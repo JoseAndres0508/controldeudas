@@ -1,5 +1,5 @@
 import { DB, save } from '../state.js';
-import { activeDebts, creditorById, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
+import { activeDebts, bankPayoffDate, creditorById, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, monthsBetween, parseNum, payDayOf, toCRC } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
@@ -24,12 +24,33 @@ let statusFilter = 'activa';
  *  por defecto para que la tabla no abrume; se muestran con el toggle. */
 let showDetails = false;
 
+const projFor = (d, crc) => singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency), payDayOf(d));
+
 function finEstimadoHTML(d, crc) {
-  const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
+  const proj = projFor(d, crc);
   if (!proj) return '<span class="chip warn">falta dato</span>';
   if (!proj.reached) return '<span class="chip warn">cuota insuficiente</span>';
-  // La fecha siempre cae en un 15 o un 30: son los únicos días de abono.
+  // La fecha siempre cae en el día de pago de la deuda: 15 o 30.
   return fmtDateLong(proj.endDate);
+}
+
+/** Compara la fecha propia contra el plazo que puso la entidad. */
+function bankComparisonHTML(d, proj) {
+  const bank = bankPayoffDate(d);
+  if (!bank) {
+    return `<p class="dim" style="font-size:.8125rem;margin:0">Cargá <strong>fecha de inicio</strong> y <strong>plazo del banco</strong> en Editar para comparar contra lo que te puso la entidad.</p>`;
+  }
+  if (!proj || !proj.reached) {
+    return `<p style="font-size:.875rem;margin:0">Según la entidad, esta deuda termina el <strong>${fmtDateLong(bank)}</strong> (${d.termMonths} meses de plazo).</p>`;
+  }
+  const diff = monthsBetween(proj.endDate, bank);   // + = el banco termina después
+  const label = diff > 0
+    ? `<strong style="color:var(--down)">${diff} ${diff === 1 ? 'mes' : 'meses'} antes</strong> de lo que dice la entidad`
+    : diff < 0
+      ? `<strong style="color:var(--up)">${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'mes' : 'meses'} después</strong> del plazo de la entidad`
+      : `<strong>justo en el plazo</strong> de la entidad`;
+  return `<p style="font-size:.875rem;margin:0">La entidad la puso a <strong>${d.termMonths} meses</strong>, hasta el ${fmtDateLong(bank)}.
+    Pagando la cuota mínima salís el <strong>${fmtDateLong(proj.endDate)}</strong>: ${label}.</p>`;
 }
 
 function dueHTML(d) {
@@ -165,10 +186,17 @@ export function openDebt(id, preselectCreditorId) {
       <div><label>Tasa de interés anual %</label><input class="num-in" id="dRate" value="${d.rate ?? ''}" placeholder="Ej: 48.5" inputmode="decimal"></div>
       <div><label>Cuota mínima mensual</label><input class="num-in" id="dMin" value="${d.minPayment ?? ''}" placeholder="Ej: 45000" inputmode="decimal"></div>
       <div><label>Fecha de inicio</label><input type="date" id="dStart" value="${d.startDate || ''}"></div>
-      <div><label>Día de pago (1-31)</label><input class="num-in" id="dDue" value="${d.dueDay ?? ''}" placeholder="Ej: 15" inputmode="numeric"></div>
+      <div><label>Día de pago</label>
+        <select id="dDue">
+          <option value="" ${d.dueDay == null ? 'selected' : ''}>Sin definir</option>
+          <option value="15" ${d.dueDay === 15 ? 'selected' : ''}>Día 15</option>
+          <option value="30" ${d.dueDay === 30 ? 'selected' : ''}>Día 30 (fin de mes)</option>
+        </select>
+      </div>
       <div><label>Saldo inicial ${d.currency === 'USD' ? '($)' : '(₡)'}</label><input class="num-in" id="dInitial" value="${d.initialBalance ?? ''}" placeholder="Ej: 1600000" inputmode="decimal"></div>
+      <div><label>Plazo del banco (meses)</label><input class="num-in" id="dTerm" value="${d.termMonths ?? ''}" placeholder="Ej: 60" inputmode="numeric"></div>
     </div>
-    <p class="dim" style="font-size:.75rem;margin:8px 0 0">El saldo inicial es con cuánto arrancó la deuda. Sirve para medir cuánto llevás pagado. En una tarjeta que te dieron en cero, poné 0.</p>
+    <p class="dim" style="font-size:.75rem;margin:8px 0 0">El <strong>saldo inicial</strong> es con cuánto arrancó la deuda; en una tarjeta que te dieron en cero, poné 0. El <strong>plazo del banco</strong> es a cuántos meses te la puso la entidad: junto con la fecha de inicio sirve para comparar si vas adelantado o atrasado.</p>
     <div style="margin-top:12px"><label>Notas</label><textarea id="dNotes" rows="2" placeholder="Fecha de corte, número de cuenta, condiciones…">${d.notes || ''}</textarea></div>
     ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:.8125rem;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>
     <hr style="margin:16px 0 10px">
@@ -197,7 +225,8 @@ export function openDebt(id, preselectCreditorId) {
       minPayment: parseNum(document.getElementById('dMin').value),
       startDate: document.getElementById('dStart').value || null,
       initialBalance: parseNum(document.getElementById('dInitial').value),
-      dueDay: (() => { const n = parseNum(document.getElementById('dDue').value); return n ? Math.min(31, Math.max(1, Math.round(n))) : null; })(),
+      dueDay: (() => { const v = document.getElementById('dDue').value; return v === '15' ? 15 : v === '30' ? 30 : null; })(),
+      termMonths: (() => { const n = parseNum(document.getElementById('dTerm').value); return n && n > 0 ? Math.round(n) : null; })(),
       notes: document.getElementById('dNotes').value,
       archived: id ? document.getElementById('dArch').checked : false
     };
@@ -245,12 +274,12 @@ export function openDebtDetail(id) {
   const crc = toCRC(bal, d.currency);
   const c = creditorById(d.creditorId);
   const info = dueInfo(d);
-  const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
+  const proj = projFor(d, crc);
   const prog = debtProgress(d);
 
   showModal(`
     <h2>${d.name}${info ? `<span style="margin-left:8px">${statusDotHTML(info)}</span>` : ''}</h2>
-    <p class="dim" style="font-size:.8125rem;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind}</p>
+    <p class="dim" style="font-size:.8125rem;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind} · paga el ${payDayOf(d)}${d.dueDay == null ? ' (asumido)' : ''}</p>
     <div class="stat-row">
       <div class="stat"><div class="k">Saldo inicial</div><div class="v">${prog ? fmtMoney(prog.initial, d.currency) : '—'}</div></div>
       <div class="stat"><div class="k">Saldo actual</div><div class="v">${fmtMoney(bal, d.currency)}</div></div>
@@ -259,6 +288,10 @@ export function openDebtDetail(id) {
       <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:.9375rem">${proj && proj.reached ? fmtDateLong(proj.endDate) : '—'}</div></div>
     </div>
     ${progressCardHTML(d, prog)}
+    <div class="card">
+      <div class="card-head"><h3>Plazo de la entidad</h3>${d.termMonths ? `<span class="chip">${d.termMonths} meses</span>` : ''}</div>
+      ${bankComparisonHTML(d, proj)}
+    </div>
     ${c ? `<div class="card">
       <div class="card-head"><h3>Acreedor</h3></div>
       <p style="margin:0;font-size:.875rem"><strong style="font-weight:500">${c.name}</strong></p>

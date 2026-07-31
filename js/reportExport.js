@@ -1,5 +1,5 @@
 import { DB } from './state.js';
-import { activeDebts, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, overallProgress, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
+import { activeDebts, bankPayoffDate, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, overallProgress, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
 import { debtStatus, movementLabel, totalPaidCRC } from './payments.js';
 import { toast } from './toast.js';
 
@@ -19,6 +19,9 @@ export function exportExcel() {
     Moneda: d.currency,
     'Tasa anual %': d.rate ?? '',
     'Cuota mínima': d.minPayment ?? '',
+    'Día de pago': d.dueDay ?? '',
+    'Plazo banco (meses)': d.termMonths ?? '',
+    'Fin según banco': bankPayoffDate(d) ?? '',
     'Saldo inicial': d.initialBalance ?? '',
     'Saldo actual': lastBalance(d.id),
     'Pagado': d.initialBalance != null ? Math.max(0, d.initialBalance - lastBalance(d.id)) : '',

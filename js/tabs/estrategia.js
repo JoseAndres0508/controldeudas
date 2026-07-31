@@ -1,11 +1,17 @@
 import { DB, save } from '../state.js';
-import { activeDebts, fmtCRC, fmtDateLong, fmtPeriods, lastBalance, parseNum, payDateAfter, PERIODS_PER_YEAR, toCRC } from '../utils.js';
+import { activeDebts, bankPayoffDate, fmtCRC, fmtDateLong, fmtPeriods, lastBalance, monthsBetween, nextPaySlot, otherPaySlot, parseNum, payDateAfter, payDayOf, PERIODS_PER_YEAR, toCRC } from '../utils.js';
 
-/* Sólo se puede abonar los 15 y 30, así que la simulación avanza de
-   quincena en quincena: el interés se acumula sobre 24 períodos al año
-   y la cuota mínima mensual se reparte en las dos fechas del mes. */
+/* =========================================================
+   CÓMO SE SIMULA
+   La línea de tiempo avanza de quincena en quincena (15, 30,
+   15, 30…) porque cada deuda vence en un día distinto. Pero
+   cada deuda paga UNA sola vez al mes: su cuota completa, el
+   día que le toca. No hay medias cuotas.
+
+   El interés sí corre en cada quincena (tasa anual / 24),
+   porque se acumula esté o no en fecha de pago.
+   ========================================================= */
 const MAX_PERIODS = 1200;               // 50 años, corte de seguridad
-const HALF = x => (x || 0) / 2;
 
 /* =========================================================
    PESTAÑA: ESTRATEGIA
@@ -16,66 +22,106 @@ const HALF = x => (x || 0) / 2;
    ========================================================= */
 export function orderedPlan(strategy) {
   const list = activeDebts()
-    .map(d => ({ d, bal: toCRC(lastBalance(d.id), d.currency), rate: d.rate, min: toCRC(d.minPayment || 0, d.currency) }))
+    .map(d => ({ d, bal: toCRC(lastBalance(d.id), d.currency), rate: d.rate, min: toCRC(d.minPayment || 0, d.currency), day: payDayOf(d) }))
     .filter(x => x.bal > 0);
   if (strategy === 'avalancha') list.sort((a, b) => (b.rate ?? -1) - (a.rate ?? -1) || a.bal - b.bal);
   else list.sort((a, b) => a.bal - b.bal);
   return list;
 }
 
-/** Simula quincena a quincena (los 15 y los 30): interés del período,
- *  media cuota mínima de cada deuda, y el resto del dinero disponible
- *  —incluido el extra y las cuotas que se liberan al saldar una deuda—
- *  va completo a la primera de la lista.
+/** Turno (15 o 30) que corresponde a la n-ésima quincena de la simulación. */
+const slotAt = (n, first) => (n % 2 === 1 ? first : otherPaySlot(first));
+
+/** Simula el plan completo.
  *
- *  `extraMonthly` viene como monto mensual y se reparte entre las dos
- *  fechas del mes, igual que las cuotas.
+ *  En cada quincena: corre el interés de todas las deudas, y las que
+ *  vencen ese día pagan su cuota mensual completa. El dinero extra —más
+ *  las cuotas que quedan libres cuando una deuda se salda— se le suma a
+ *  la primera de la lista el día que a ella le toca pagar.
  *
- *  Devuelve los plazos en quincenas (`periods`) y la fecha real de
- *  salida, que siempre cae en un 15 o un 30. */
-export function simulate(strategy, extraMonthly) {
+ *  `extraMonthly` es el extra mensual, y se aplica una vez al mes.
+ *
+ *  Devuelve el plazo en quincenas (`periods`) y la fecha real de salida,
+ *  que siempre cae en un 15 o un 30. */
+export function simulate(strategy, extraMonthly, from = new Date()) {
   const plan = orderedPlan(strategy);
   if (!plan.length || plan.some(p => p.rate === null || p.rate === undefined)) return null;
+  if (!plan.some(p => p.min > 0)) return null;
 
-  const debts = plan.map(p => ({ name: p.d.name, bal: p.bal, rate: p.rate / 100 / PERIODS_PER_YEAR, min: HALF(p.min) }));
-  const totalMin = debts.reduce((s, d) => s + d.min, 0);
-  if (totalMin <= 0) return null;
-  const extra = HALF(extraMonthly);
+  const debts = plan.map(p => ({
+    name: p.d.name, bal: p.bal, min: p.min, day: p.day,
+    rate: p.rate / 100 / PERIODS_PER_YEAR
+  }));
+  const first = nextPaySlot(from);
 
-  let periods = 0, interest = 0;
+  let periods = 0, interest = 0, freed = 0;   // freed: cuotas de deudas ya saldadas
   const payoff = {};
+
   while (debts.some(d => d.bal > 0.5) && periods < MAX_PERIODS) {
     periods++;
-    let pool = totalMin + extra;
+    const day = slotAt(periods, first);
+
+    // El interés corre siempre, toque pagar o no.
     debts.forEach(d => { if (d.bal > 0) { const i = d.bal * d.rate; d.bal += i; interest += i; } });
-    debts.forEach(d => { if (d.bal > 0) { const pay = Math.min(d.min, d.bal); d.bal -= pay; pool -= pay; } });
-    for (const d of debts) {
-      if (pool <= 0) break;
-      if (d.bal > 0) { const pay = Math.min(pool, d.bal); d.bal -= pay; pool -= pay; }
+
+    // Sólo pagan las deudas que vencen hoy, y pagan la cuota completa.
+    debts.forEach(d => { if (d.bal > 0 && d.day === day) d.bal -= Math.min(d.min, d.bal); });
+
+    // El extra y lo liberado van al objetivo, el día que a él le toca.
+    const target = debts.find(d => d.bal > 0.5);
+    if (target && target.day === day) {
+      const pool = (extraMonthly || 0) + freed;
+      if (pool > 0) target.bal -= Math.min(pool, target.bal);
     }
-    debts.forEach(d => { if (d.bal <= 0.5 && !payoff[d.name]) { payoff[d.name] = periods; d.bal = 0; } });
+
+    debts.forEach(d => {
+      if (d.bal <= 0.5 && !payoff[d.name]) { payoff[d.name] = periods; d.bal = 0; freed += d.min; }
+    });
   }
 
   const reached = periods < MAX_PERIODS;
-  return { periods, interest, payoff, reached, endDate: reached ? payDateAfter(periods) : null };
+  return { periods, interest, payoff, reached, endDate: reached ? payDateAfter(periods, from) : null };
 }
 
-/** Proyección de UNA sola deuda pagando sólo su cuota mínima, sin extra
- *  ni orden de ataque. Igual que simulate(), avanza por quincenas.
- *  `minMonthlyCRC` es la cuota mensual; se abona la mitad cada 15 y 30. */
-export function singleDebtProjection(balCRC, ratePct, minMonthlyCRC) {
+/** Proyección de UNA sola deuda pagando sólo su cuota mensual el día que
+ *  le toca, sin extra ni orden de ataque. */
+export function singleDebtProjection(balCRC, ratePct, minMonthlyCRC, payDay = 30, from = new Date()) {
   if (ratePct === null || ratePct === undefined || !minMonthlyCRC || balCRC <= 0) return null;
   const rate = ratePct / 100 / PERIODS_PER_YEAR;
-  const pay = HALF(minMonthlyCRC);
+  const first = nextPaySlot(from);
   let bal = balCRC, periods = 0, interest = 0;
+
   while (bal > 0.5 && periods < MAX_PERIODS) {
     periods++;
     const i = bal * rate;
     bal += i; interest += i;
-    bal -= Math.min(pay, bal);
+    if (slotAt(periods, first) === payDay) bal -= Math.min(minMonthlyCRC, bal);
   }
+
   const reached = periods < MAX_PERIODS;
-  return { periods, interest, reached, endDate: reached ? payDateAfter(periods) : null };
+  return { periods, interest, reached, endDate: reached ? payDateAfter(periods, from) : null };
+}
+
+/** Contraste entre el plan propio y los plazos que pusieron las entidades.
+ *  Toma la deuda que la entidad termina más tarde: ése es el día en que
+ *  saldrías si sólo te dejaras llevar por el banco. */
+function bankVsPlanHTML(sim) {
+  const dates = activeDebts()
+    .map(d => ({ d, bank: bankPayoffDate(d) }))
+    .filter(x => x.bank && toCRC(lastBalance(x.d.id), x.d.currency) > 0);
+  if (!dates.length) {
+    return `<p class="dim" style="font-size:.75rem;margin:0">Cargá la <strong>fecha de inicio</strong> y el <strong>plazo del banco</strong> en tus deudas para ver cuánto le ganás al calendario de las entidades.</p>`;
+  }
+  const last = dates.reduce((a, b) => (a.bank > b.bank ? a : b));
+  const diff = monthsBetween(sim.endDate, last.bank);
+  const verdict = diff > 0
+    ? `Le ganás <strong style="color:var(--down)">${diff} ${diff === 1 ? 'mes' : 'meses'}</strong> al calendario de las entidades.`
+    : diff < 0
+      ? `Vas <strong style="color:var(--up)">${Math.abs(diff)} ${Math.abs(diff) === 1 ? 'mes' : 'meses'}</strong> por detrás del plazo de las entidades: la cuota mínima no alcanza para cerrar a tiempo.`
+      : `Vas justo al ritmo que pusieron las entidades.`;
+  return `<div style="border-top:1px solid var(--rule-soft);padding-top:10px">
+    <p style="font-size:.8125rem;margin:0"><span class="chip">vs. el banco</span> Según los plazos de las entidades, la última en cerrar sería <strong>${last.d.name}</strong> el ${fmtDateLong(last.bank)}. ${verdict}</p>
+  </div>`;
 }
 
 /** Fragmento de HTML de la tarjeta "¿Cuál ataco primero?" + proyección. */
@@ -103,15 +149,16 @@ export function strategySectionHTML() {
   html += `<div style="margin-bottom:16px;max-width:260px">
     <label>Pago extra mensual (₡)</label>
     <input class="num-in" id="extraIn" value="${extra}" inputmode="decimal">
-    <p class="dim" style="font-size:.6875rem;margin:5px 0 0">Se reparte entre el 15 y el 30${extra ? `: ${fmtCRC(extra / 2)} cada quincena` : ''}.</p>
+    <p class="dim" style="font-size:.6875rem;margin:5px 0 0">Se le suma completo a la deuda objetivo, el día que ella paga.</p>
   </div>`;
 
-  html += `<table><thead><tr><th></th><th>Orden de ataque</th><th class="ta-r">Tasa</th><th class="ta-r hide-sm">Cuota mín.</th><th class="ta-r">Saldo (₡)</th></tr></thead><tbody>`;
+  html += `<table><thead><tr><th></th><th>Orden de ataque</th><th class="ta-r">Tasa</th><th class="hide-sm">Paga el</th><th class="ta-r hide-sm">Cuota mín.</th><th class="ta-r">Saldo (₡)</th></tr></thead><tbody>`;
   plan.forEach((p, i) => {
     html += `<tr>
       <td class="rank ${i === 0 ? 'first' : ''}">${String(i + 1).padStart(2, '0')}</td>
       <td>${i === 0 ? '<strong style="font-weight:500">' : ''}${p.d.name}${i === 0 ? '</strong> <span class="chip warn">objetivo</span>' : ''}</td>
       <td class="ta-r num">${p.rate === null || p.rate === undefined ? '<span class="chip warn">falta</span>' : p.rate.toFixed(2) + '%'}</td>
+      <td class="hide-sm num" style="font-size:.8125rem">${p.day}${p.d.dueDay == null ? ' <span class="dim">(asumido)</span>' : ''}</td>
       <td class="ta-r num hide-sm">${p.min ? fmtCRC(p.min) : '<span class="dim">—</span>'}</td>
       <td class="ta-r num">${fmtCRC(p.bal)}</td>
     </tr>`;
@@ -134,7 +181,8 @@ export function strategySectionHTML() {
         <div class="stat"><div class="k">Bola de nieve · intereses</div><div class="v">${fmtCRC(simB.interest)}</div></div>
       </div>
       <p style="font-size:.875rem;margin:0 0 8px">Con <strong>${st === 'avalancha' ? 'avalancha' : 'bola de nieve'}</strong> quedás libre el <strong>${fmtDateLong(chosen.endDate)}</strong>, en ${chosen.periods} quincenas.</p>
-      <p class="muted" style="font-size:.8125rem;margin:0">La avalancha te ahorra <strong>${fmtCRC(Math.abs(diff))}</strong> en intereses y ${pdiff} quincena${pdiff === 1 ? '' : 's'} respecto a la bola de nieve. Elegí bola de nieve solo si necesitás ver deudas cerradas para no rendirte.</p></div>`;
+      <p class="muted" style="font-size:.8125rem;margin:0 0 10px">La avalancha te ahorra <strong>${fmtCRC(Math.abs(diff))}</strong> en intereses y ${pdiff} quincena${pdiff === 1 ? '' : 's'} respecto a la bola de nieve. Elegí bola de nieve solo si necesitás ver deudas cerradas para no rendirte.</p>
+      ${bankVsPlanHTML(chosen)}</div>`;
   } else {
     html += `<div class="card"><h3 style="margin-bottom:8px">Proyección</h3>
       <p class="muted" style="font-size:.875rem;margin:0">Para simular en cuánto tiempo salís y cuánto pagás en intereses, cada deuda activa necesita <strong>tasa anual</strong> y <strong>cuota mínima</strong>. ${noMin.length ? `Faltan cuotas en: ${noMin.map(m => m.d.name).join(', ')}.` : ''}</p>

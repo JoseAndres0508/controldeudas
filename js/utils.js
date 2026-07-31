@@ -52,6 +52,44 @@ export function payDateAfter(n, from = new Date()) {
   return null;
 }
 
+/** A cuál de los dos días de pago (15 o 30) pertenece la próxima fecha.
+ *  Sirve para arrancar la simulación en el turno correcto: si hoy es 20,
+ *  el siguiente turno es el del 30, no el del 15. */
+export function nextPaySlot(from = new Date()) {
+  const start = new Date(from); start.setHours(0, 0, 0, 0);
+  const y = start.getFullYear(), m = start.getMonth();
+  for (const day of PAY_DAYS) {
+    if (payDateInMonth(y, m, day) > start) return day;
+  }
+  return PAY_DAYS[0];   // ya pasaron los dos este mes: sigue el 15 del próximo
+}
+
+/** El otro día de pago. */
+export const otherPaySlot = slot => (slot === 15 ? 30 : 15);
+
+/** Día de pago efectivo de una deuda. Si no está definido se asume el 30
+ *  (fin de mes), que es lo más común en préstamos. */
+export const payDayOf = d => (d.dueDay === 15 ? 15 : 30);
+
+/** Fecha en que la deuda queda saldada según el plazo que dio la entidad:
+ *  fecha de inicio + plazo en meses, caída en el día de pago de la deuda.
+ *  Devuelve null si falta alguno de los dos datos. */
+export function bankPayoffDate(d) {
+  if (!d.termMonths || !d.startDate) return null;
+  const [y, m] = d.startDate.split('-').map(Number);
+  const end = new Date(y, (m - 1) + d.termMonths, 1);
+  const dt = payDateInMonth(end.getFullYear(), end.getMonth(), payDayOf(d));
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
+/** Diferencia en meses entre dos fechas ISO (b - a). Positivo = b es después. */
+export function monthsBetween(aISO, bISO) {
+  if (!aISO || !bISO) return null;
+  const [ay, am, ad] = aISO.split('-').map(Number);
+  const [by, bm, bd] = bISO.split('-').map(Number);
+  return (by - ay) * 12 + (bm - am) + (bd >= ad ? 0 : -1);
+}
+
 /** Texto corto de una cantidad de quincenas: "18 meses", "1 mes y medio". */
 export function fmtPeriods(periods) {
   const months = Math.floor(periods / 2);

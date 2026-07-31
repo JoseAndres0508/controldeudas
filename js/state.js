@@ -30,6 +30,12 @@ function migrate() {
     }
     if (d.creditorId === undefined) d.creditorId = null;
 
+    // Sólo se abona los 15 y los 30: cualquier día suelto de antes se
+    // acomoda al más cercano de los dos.
+    if (d.dueDay !== null && d.dueDay !== undefined) d.dueDay = d.dueDay <= 22 ? 15 : 30;
+    // Plazo que dio la entidad, en meses. Nuevo, arranca vacío.
+    if (d.termMonths === undefined) d.termMonths = null;
+
     // Saldo inicial: si no está, se rellena con el primer saldo que aparezca
     // en los cortes. Es una estimación editable — el usuario puede corregirla
     // en el formulario de la deuda.
