@@ -46,18 +46,16 @@ export function renderInicio() {
     .filter(x => x.info && (x.info.status === 'vencido' || x.info.status === 'proximo'))
     .sort((a, b) => (a.info.status === b.info.status ? a.info.date.localeCompare(b.info.date) : a.info.status === 'vencido' ? -1 : 1));
 
-  if (dues.length) {
-    html += `<div class="card">
+  const duesCard = dues.length ? `<div class="card">
       <div class="card-head"><h2>Pagos próximos y vencidos</h2></div>
       ${dues.map(({ d, info }) => `<div class="mini-row">
           ${statusDotHTML(info)}
           <div class="mini-main"><p class="mini-name">${d.name}</p><span class="dim" style="font-size:12px">${STATUS_LABEL[info.status]} · ${fmtDateLong(info.date)}</span></div>
           <button class="btn ghost" data-pagar="${d.id}">Pagar</button>
         </div>`).join('')}
-    </div>`;
-  }
+    </div>` : null;
 
-  html += `<div class="card">
+  const topCard = `<div class="card">
     <div class="card-head"><h2>Deudas más altas</h2></div>
     ${top.length ? top.map((x, i) => { const info = dueInfo(x.d); return `<div class="mini-row">
         <span class="rank ${i === 0 ? 'first' : ''}">${String(i + 1).padStart(2, '0')}</span>
@@ -70,7 +68,12 @@ export function renderInicio() {
       </div>`; }).join('') : `<div class="empty">Todavía no hay deudas activas con saldo.</div>`}
   </div>`;
 
-  html += `<div class="card">
+  // Dos tarjetas por fila en vez de apiladas: agrupa alertas + ranking,
+  // y avance + actividad reciente, para que el dashboard no sea una
+  // columna interminable de tarjetas.
+  html += duesCard ? `<div class="grid g2">${duesCard}${topCard}</div>` : topCard;
+
+  const bestCard = `<div class="card">
     <div class="card-head"><h2>La que más bajó</h2></div>
     ${best ? `<p style="margin:0 0 10px;font-size:14px"><strong style="font-weight:500">${best.d.name}</strong> bajó <strong style="color:var(--down)">${fmtCRC(best.reduction)}</strong> desde el ${fmtDateLong(best.firstDate)}.</p>
       ${reductions.length > 1 ? reductions.slice(0, 5).map(x => `<div class="mini-row">
@@ -82,7 +85,7 @@ export function renderInicio() {
   </div>`;
 
   const recent = recentPayments(6);
-  html += `<div class="card">
+  const recentCard = `<div class="card">
     <div class="card-head"><h2>Últimos movimientos</h2></div>
     ${recent.length ? recent.map(p => {
       const d = debtById(p.debtId);
@@ -92,6 +95,8 @@ export function renderInicio() {
       </div>`;
     }).join('') : `<div class="empty">Todavía no hay pagos registrados.</div>`}
   </div>`;
+
+  html += `<div class="grid g2">${bestCard}${recentCard}</div>`;
 
   html += tapeHTML();
   html += strategySectionHTML();
