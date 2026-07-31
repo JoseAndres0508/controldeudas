@@ -1,0 +1,621 @@
+{
+  "version": 1,
+  "settings": {
+    "fx": 512,
+    "strategy": "avalancha",
+    "extra": 0
+  },
+  "debts": [
+    {
+      "id": "c160iih",
+      "name": "Tarjeta Promérica",
+      "issuer": "Promérica",
+      "kind": "tarjeta",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "bqd3ioh",
+      "name": "Tarjeta Promérica USD",
+      "issuer": "Promérica",
+      "kind": "tarjeta",
+      "currency": "USD",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "73ubg1c",
+      "name": "Tarjeta Popular",
+      "issuer": "Banco Popular",
+      "kind": "tarjeta",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "ol5fhu8",
+      "name": "Tarjeta Popular USD",
+      "issuer": "Banco Popular",
+      "kind": "tarjeta",
+      "currency": "USD",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "qzp52tb",
+      "name": "Gollo impresora",
+      "issuer": "Gollo",
+      "kind": "tienda",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": true,
+      "startDate": null
+    },
+    {
+      "id": "c51nnbw",
+      "name": "Gollo principal",
+      "issuer": "Gollo",
+      "kind": "tienda",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "au48vd2",
+      "name": "Instacredit",
+      "issuer": "Instacredit",
+      "kind": "prestamo",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "xff7d47",
+      "name": "Préstamo Popular",
+      "issuer": "Banco Popular",
+      "kind": "prestamo",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    },
+    {
+      "id": "qqk882u",
+      "name": "Popular deudas",
+      "issuer": "Banco Popular",
+      "kind": "prestamo",
+      "currency": "CRC",
+      "rate": null,
+      "minPayment": null,
+      "notes": "",
+      "archived": false,
+      "startDate": null
+    }
+  ],
+  "periods": [
+    {
+      "id": "dl5l2vb",
+      "date": "2025-08-30",
+      "entries": {
+        "c160iih": {
+          "balance": 0,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1600000,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 7,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "s6npqri",
+      "date": "2025-09-30",
+      "entries": {
+        "c160iih": {
+          "balance": 515919.75,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1577934,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 19167027.8,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "fwkdrmm",
+      "date": "2025-10-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1146600.54,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1549201.55,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 19129556.85,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "q4bcveb",
+      "date": "2025-11-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1065211.2,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1522633.25,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 19083745.05,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "mlcymga",
+      "date": "2025-12-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1187976.3,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1188846.9,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 19045215.1,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "pijsdbk",
+      "date": "2026-01-30",
+      "entries": {
+        "c160iih": {
+          "balance": 91520.65,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 131047,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1154743,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18999387.95,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4975164.2,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "n6q3k2w",
+      "date": "2026-02-28",
+      "entries": {
+        "c160iih": {
+          "balance": 999835.63,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1112558,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18999387.95,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4949321.6,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "fnfi116",
+      "date": "2026-03-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1247780.09,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 30000,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1072657.4,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18926657.7,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4939515.6,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "g7dt1s0",
+      "date": "2026-04-30",
+      "entries": {
+        "c160iih": {
+          "balance": 216593.54,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 0,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 460349.13,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1019155,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1500000,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18886449.45,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4918968.85,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "qtuwzyo",
+      "date": "2026-05-15",
+      "entries": {
+        "c160iih": {
+          "balance": 181656.39,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 0,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 375249.13,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 987112,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1680380.78,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18886449.45,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4851303.1,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "scjtuwy",
+      "date": "2026-05-30",
+      "entries": {
+        "c160iih": {
+          "balance": 723725,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 0,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 375249.13,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 1004748,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1680380.78,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18828362.1,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4841576,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "wvglrho",
+      "date": "2026-06-15",
+      "entries": {
+        "c160iih": {
+          "balance": 1166243.92,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 0,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 369018.41,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 973461,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1668906.08,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18828362.1,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4810866.4,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "ktxa6q5",
+      "date": "2026-06-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1319662.05,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 48.29,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 463056.89,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 973461,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1668906.08,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18787027.7,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4810866.4,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "zw4v1x2",
+      "date": "2026-07-15",
+      "entries": {
+        "c160iih": {
+          "balance": 1337221.92,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 58.97,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 415777.1,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 953004,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1657139.53,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18787024.7,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4792036.3,
+          "paid": null
+        }
+      },
+      "note": ""
+    },
+    {
+      "id": "f4o274r",
+      "date": "2026-07-30",
+      "entries": {
+        "c160iih": {
+          "balance": 1300066,
+          "paid": null
+        },
+        "bqd3ioh": {
+          "balance": 50.31,
+          "paid": null
+        },
+        "73ubg1c": {
+          "balance": 415777.1,
+          "paid": null
+        },
+        "ol5fhu8": {
+          "balance": 11.29,
+          "paid": null
+        },
+        "qzp52tb": {
+          "balance": 0,
+          "paid": null
+        },
+        "c51nnbw": {
+          "balance": 953004,
+          "paid": null
+        },
+        "au48vd2": {
+          "balance": 1657139.53,
+          "paid": null
+        },
+        "xff7d47": {
+          "balance": 18737440,
+          "paid": null
+        },
+        "qqk882u": {
+          "balance": 4792036.3,
+          "paid": null
+        }
+      },
+      "note": ""
+    }
+  ]
+}

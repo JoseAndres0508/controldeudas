@@ -1,9 +1,11 @@
 import { DB, save } from '../state.js';
-import { activeDebts, addMonthsISO, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
+import { activeDebts, addMonthsISO, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
 import { singleDebtProjection } from './estrategia.js';
+import { openCreditor } from './acreedores.js';
+import { paymentsHistoryHTML, wirePaymentsHistory } from '../payments.js';
 
 /* =========================================================
    PESTAÑA: INGRESAR DEUDAS
@@ -36,14 +38,14 @@ export function renderDeudas() {
     const bal = lastBalance(d.id);
     html += `<tr>
       <td><span class="chip">${d.currency}</span></td>
-      <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:12px">${d.issuer || ''}</span></td>
+      <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
       <td class="hide-sm"><span class="chip">${d.kind}</span></td>
       <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
       <td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>
       <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
       <td class="hide-sm num">${d.startDate ? fmtDateLong(d.startDate) : '<span class="dim">—</span>'}</td>
       <td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>
-      <td class="ta-r"><button class="btn ghost" data-editdebt="${d.id}">Editar</button></td>
+      <td class="ta-r"><div class="btn-row" style="justify-content:flex-end"><button class="btn ghost" data-pagar="${d.id}">Pagar</button><button class="btn ghost" data-editdebt="${d.id}">Editar</button></div></td>
     </tr>`;
   });
   html += `</tbody></table></div>`;
@@ -56,13 +58,27 @@ export function renderDeudas() {
   el.innerHTML = html;
 }
 
-export function openDebt(id) {
-  const d = id ? debtById(id) : { id: null, name: '', issuer: '', kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false, startDate: null };
+function creditorFieldHTML(d) {
+  return `<div><label>Acreedor</label>
+    <div style="display:flex;gap:6px">
+      <select id="dCreditor" style="flex:1">
+        <option value="">Sin acreedor</option>
+        ${DB.creditors.map(c => `<option value="${c.id}" ${d.creditorId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
+      </select>
+      <button type="button" class="btn ghost" id="dNewCreditor">+ Nuevo</button>
+    </div>
+  </div>`;
+}
+
+export function openDebt(id, preselectCreditorId) {
+  const d = id ? debtById(id) : { id: null, name: '', creditorId: preselectCreditorId || null, kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false, startDate: null };
+  if (preselectCreditorId && id) d.creditorId = preselectCreditorId;
+
   showModal(`
     <h2>${id ? 'Editar deuda' : 'Nueva deuda'}</h2>
     <div class="grid g2">
       <div><label>Nombre</label><input id="dName" value="${d.name}" placeholder="Ej: Tarjeta Promérica"></div>
-      <div><label>Entidad</label><input id="dIssuer" value="${d.issuer || ''}" placeholder="Ej: Promérica"></div>
+      ${creditorFieldHTML(d)}
       <div><label>Tipo</label><select id="dKind">
         ${['tarjeta', 'prestamo', 'tienda', 'otro'].map(k => `<option value="${k}" ${d.kind === k ? 'selected' : ''}>${k}</option>`).join('')}
       </select></div>
@@ -75,7 +91,10 @@ export function openDebt(id) {
       <div><label>Fecha de inicio</label><input type="date" id="dStart" value="${d.startDate || ''}"></div>
     </div>
     <div style="margin-top:12px"><label>Notas</label><textarea id="dNotes" rows="2" placeholder="Fecha de corte, número de cuenta, condiciones…">${d.notes || ''}</textarea></div>
-    ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:13px;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>` : ''}
+    ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:13px;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>
+    <hr style="margin:16px 0 10px">
+    <h3 style="margin-bottom:4px">Historial de pagos</h3>
+    ${paymentsHistoryHTML(id)}` : ''}
     <div class="modal-foot">
       ${id ? '<button class="btn danger" id="dDelete" style="margin-right:auto">Eliminar</button>' : ''}
       <button class="btn" data-close>Cancelar</button>
@@ -83,10 +102,16 @@ export function openDebt(id) {
     </div>
   `);
 
+  if (id) wirePaymentsHistory(() => openDebt(id));
+
+  document.getElementById('dNewCreditor').onclick = () => {
+    openCreditor(null, (created) => openDebt(id, created.id));
+  };
+
   document.getElementById('dSave').onclick = () => {
     const obj = {
       name: document.getElementById('dName').value.trim() || 'Sin nombre',
-      issuer: document.getElementById('dIssuer').value.trim(),
+      creditorId: document.getElementById('dCreditor').value || null,
       kind: document.getElementById('dKind').value,
       currency: document.getElementById('dCur').value,
       rate: parseNum(document.getElementById('dRate').value),
@@ -104,6 +129,7 @@ export function openDebt(id) {
     if (!confirm('Esto borra la deuda y su historial en todos los cortes. ¿Seguro? Mejor archivala si ya la pagaste.')) return;
     DB.debts = DB.debts.filter(x => x.id !== id);
     DB.periods.forEach(p => delete p.entries[id]);
+    DB.payments = DB.payments.filter(p => p.debtId !== id);
     save(); closeModal(); renderAll();
   };
 }

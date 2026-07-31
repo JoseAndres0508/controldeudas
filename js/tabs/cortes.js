@@ -1,5 +1,5 @@
 import { DB, save, setDB } from '../state.js';
-import { activeDebts, fmtCRC, fmtDateLong, fmtMoney, fmtSigned, lastBalance, parseNum, pendingCutDate, series } from '../utils.js';
+import { activeDebts, creditorName, fmtCRC, fmtDateLong, fmtMoney, fmtSigned, lastBalance, parseNum, pendingCutDate, series } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { Store } from '../store.js';
 import { uid } from '../uid.js';
@@ -81,7 +81,7 @@ export function openCut(dateOrNull, periodId) {
     const bal = e && e.balance !== null && e.balance !== undefined ? e.balance : prev;
     const paid = e && e.paid !== null && e.paid !== undefined ? e.paid : '';
     return `<div class="snap-row">
-      <div class="snap-name">${d.name}<small>${d.issuer || ''} · saldo anterior ${fmtMoney(prev, d.currency)}</small></div>
+      <div class="snap-name">${d.name}<small>${creditorName(d)} · saldo anterior ${fmtMoney(prev, d.currency)}</small></div>
       <div><label>Abono ${d.currency === 'USD' ? '($)' : '(₡)'}</label><input class="num-in" data-paid="${d.id}" value="${paid}" placeholder="0" inputmode="decimal"></div>
       <div><label>Saldo hoy ${d.currency === 'USD' ? '($)' : '(₡)'}</label><input class="num-in" data-bal="${d.id}" value="${bal}" inputmode="decimal"></div>
     </div>`;

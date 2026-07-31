@@ -5,6 +5,8 @@ import { initNav, showTab } from './nav.js';
 import { openCut } from './tabs/cortes.js';
 import { openDebt } from './tabs/deudas.js';
 import { renderInicio } from './tabs/inicio.js';
+import { openCreditor } from './tabs/acreedores.js';
+import { openPago } from './payments.js';
 import { exportJSON, importJSON, openSettings } from './settings.js';
 import { getStatus, readFile, tryRestore } from './fileSync.js';
 
@@ -17,15 +19,20 @@ initModal();
 initNav();
 
 document.body.addEventListener('click', e => {
-  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto]');
+  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar]');
   if (!t) return;
   if (t.hasAttribute('data-newcut')) openCut(t.dataset.newcut || null, null);
   else if (t.hasAttribute('data-editcut')) openCut(null, t.dataset.editcut);
   else if (t.hasAttribute('data-editdebt')) openDebt(t.dataset.editdebt);
   else if (t.hasAttribute('data-strat')) { DB.settings.strategy = t.dataset.strat; save(); renderInicio(); }
   else if (t.hasAttribute('data-goto')) showTab(t.dataset.goto);
+  else if (t.hasAttribute('data-editcreditor')) openCreditor(t.dataset.editcreditor);
+  else if (t.hasAttribute('data-pagar')) openPago(t.dataset.pagar, () => renderAll());
 });
-document.body.addEventListener('click', e => { if (e.target.id === 'btnNewDebt') openDebt(null); });
+document.body.addEventListener('click', e => {
+  if (e.target.id === 'btnNewDebt') openDebt(null);
+  else if (e.target.id === 'btnNewCreditor') openCreditor(null);
+});
 
 document.getElementById('btnExport').onclick = exportJSON;
 document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();

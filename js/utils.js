@@ -17,15 +17,24 @@ export const addMonthsISO = n => { const d = new Date(); d.setMonth(d.getMonth()
 export const sortedPeriods = () => [...DB.periods].sort((a, b) => a.date.localeCompare(b.date));
 export const activeDebts = () => DB.debts.filter(d => !d.archived);
 export const debtById = id => DB.debts.find(d => d.id === id);
+export const creditorById = id => DB.creditors.find(c => c.id === id);
+/** Nombre a mostrar del acreedor de una deuda (con respaldo al "issuer" viejo). */
+export const creditorName = d => creditorById(d.creditorId)?.name || d.issuer || '';
 
-/** Último saldo conocido de una deuda (en su moneda). */
+/** Saldo actual de una deuda (en su moneda): el último corte confirmado
+ *  menos los pagos registrados después de ese corte (aún no confirmados
+ *  por un corte nuevo, pero ya reflejados en el saldo). */
 export function lastBalance(debtId) {
   const ps = sortedPeriods();
+  let base = 0, baseDate = null;
   for (let i = ps.length - 1; i >= 0; i--) {
     const e = ps[i].entries[debtId];
-    if (e && e.balance !== null && e.balance !== undefined) return e.balance;
+    if (e && e.balance !== null && e.balance !== undefined) { base = e.balance; baseDate = ps[i].date; break; }
   }
-  return 0;
+  const paidAfter = DB.payments
+    .filter(p => p.debtId === debtId && (!baseDate || p.date > baseDate))
+    .reduce((s, p) => s + p.amount, 0);
+  return Math.max(0, base - paidAfter);
 }
 
 /** Total en colones de un periodo (convierte USD). */

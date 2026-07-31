@@ -39,5 +39,5 @@ export function buildSeed() {
     });
     return { id: uid(), date, entries, note: '' };
   });
-  return { version: 1, settings: { fx: 512, strategy: 'avalancha', extra: 0 }, debts, periods };
+  return { version: 1, settings: { fx: 512, strategy: 'avalancha', extra: 0 }, debts, periods, creditors: [], payments: [] };
 }
