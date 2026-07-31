@@ -26,9 +26,15 @@ export const creditorById = id => DB.creditors.find(c => c.id === id);
 /** Nombre a mostrar del acreedor de una deuda (con respaldo al "issuer" viejo). */
 export const creditorName = d => creditorById(d.creditorId)?.name || d.issuer || '';
 
-/** Saldo actual de una deuda (en su moneda): el último corte confirmado
- *  menos los pagos registrados después de ese corte (aún no confirmados
- *  por un corte nuevo, pero ya reflejados en el saldo). */
+/** Saldo actual de una deuda, en su moneda.
+ *
+ *  Punto de partida = lo más reciente entre el último corte con saldo y el
+ *  último "ajuste de saldo" de esa deuda (un ajuste dice cuánto se debe de
+ *  verdad ese día, igual que un corte pero para una sola deuda).
+ *
+ *  Sobre esa base se aplican los movimientos posteriores: los pagos restan
+ *  y los consumos suman. Así una tarjeta puede subir por uso y bajar por
+ *  abonos sin tener que registrar un corte completo. */
 export function lastBalance(debtId) {
   const ps = sortedPeriods();
   let base = 0, baseDate = null;
@@ -36,10 +42,19 @@ export function lastBalance(debtId) {
     const e = ps[i].entries[debtId];
     if (e && e.balance !== null && e.balance !== undefined) { base = e.balance; baseDate = ps[i].date; break; }
   }
-  const paidAfter = DB.payments
-    .filter(p => p.debtId === debtId && (!baseDate || p.date > baseDate))
-    .reduce((s, p) => s + p.amount, 0);
-  return Math.max(0, base - paidAfter);
+
+  // Un ajuste igual o posterior al corte manda sobre él.
+  const adjustments = DB.payments
+    .filter(p => p.debtId === debtId && p.type === 'ajuste')
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const lastAdj = adjustments.filter(a => !baseDate || a.date >= baseDate).pop();
+  if (lastAdj) { base = lastAdj.amount; baseDate = lastAdj.date; }
+
+  const delta = DB.payments
+    .filter(p => p.debtId === debtId && p.type !== 'ajuste' && (!baseDate || p.date > baseDate))
+    .reduce((s, p) => s + (p.type === 'consumo' ? p.amount : -p.amount), 0);
+
+  return Math.max(0, base + delta);
 }
 
 /** Total en colones de un periodo (convierte USD). */

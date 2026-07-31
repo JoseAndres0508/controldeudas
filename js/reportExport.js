@@ -1,6 +1,6 @@
 import { DB } from './state.js';
 import { activeDebts, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
-import { debtStatus, totalPaidCRC } from './payments.js';
+import { debtStatus, movementLabel, totalPaidCRC } from './payments.js';
 import { toast } from './toast.js';
 
 /* =========================================================
@@ -30,9 +30,9 @@ export function exportExcel() {
 
   const payRows = DB.payments.map(p => {
     const d = debtById(p.debtId);
-    return { Fecha: p.date, Deuda: d ? d.name : '(borrada)', Monto: p.amount, Moneda: d ? d.currency : '', Nota: p.note || '' };
+    return { Fecha: p.date, Deuda: d ? d.name : '(borrada)', Tipo: movementLabel(p), Monto: p.amount, Moneda: d ? d.currency : '', Nota: p.note || '' };
   });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(payRows), 'Pagos');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(payRows), 'Movimientos');
 
   const credRows = DB.creditors.map(c => ({ Nombre: c.name, Teléfono: c.phone || '', Correo: c.email || '', Dirección: c.address || '' }));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(credRows), 'Acreedores');

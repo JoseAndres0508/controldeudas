@@ -1,9 +1,9 @@
 import { DB } from '../state.js';
-import { activeDebts, debtById, debtReductions, fmtCRC, fmtDateLong, fmtMoney, lastBalance, toCRC } from '../utils.js';
+import { activeDebts, debtById, debtReductions, fmtCRC, fmtDateLong, lastBalance, toCRC } from '../utils.js';
 import { heroHTML, tapeHTML } from '../header.js';
 import { simulate, strategySectionHTML, wireStrategySection } from './estrategia.js';
 import { chartsSectionHTML, drawCharts } from './historial.js';
-import { dueInfo, recentPayments, statusDotHTML, STATUS_LABEL } from '../payments.js';
+import { dueInfo, movementAmountHTML, movementLabel, recentPayments, statusDotHTML, STATUS_LABEL } from '../payments.js';
 
 /* =========================================================
    PESTAÑA: INICIO
@@ -34,6 +34,7 @@ export function renderInicio() {
   html += `<div class="btn-row" style="margin-bottom:14px">
     <button class="btn primary" data-newdebt>+ Agregar deuda</button>
     <button class="btn" data-quickpago>Registrar pago</button>
+    <button class="btn" data-quickconsumo>Registrar consumo</button>
   </div>`;
 
   html += `<div class="stat-row">
@@ -90,8 +91,8 @@ export function renderInicio() {
     ${recent.length ? recent.map(p => {
       const d = debtById(p.debtId);
       return `<div class="mini-row">
-        <div class="mini-main"><p class="mini-name">${d ? d.name : '(deuda borrada)'}</p><span class="dim" style="font-size:12px">${fmtDateLong(p.date)}${p.note ? ' · ' + p.note : ''}</span></div>
-        <span class="mini-val num" style="color:var(--down)">${d ? fmtMoney(p.amount, d.currency) : ''}</span>
+        <div class="mini-main"><p class="mini-name">${d ? d.name : '(deuda borrada)'}</p><span class="dim" style="font-size:12px">${fmtDateLong(p.date)} · ${movementLabel(p)}${p.note ? ' · ' + p.note : ''}</span></div>
+        <span class="mini-val">${d ? movementAmountHTML(p, d.currency) : ''}</span>
       </div>`;
     }).join('') : `<div class="empty">Todavía no hay pagos registrados.</div>`}
   </div>`;

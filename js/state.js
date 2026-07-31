@@ -18,6 +18,8 @@ function migrate() {
   if (!Array.isArray(DB.creditors)) DB.creditors = [];
   if (!Array.isArray(DB.payments)) DB.payments = [];
   if (!DB.settings.baseCurrency) DB.settings.baseCurrency = 'CRC';
+  // Antes todos los registros eran abonos; ahora hay consumos y ajustes.
+  DB.payments.forEach(p => { if (!p.type) p.type = 'pago'; });
   DB.debts.forEach(d => {
     if (!d.creditorId && d.issuer && d.issuer.trim()) {
       const name = d.issuer.trim();

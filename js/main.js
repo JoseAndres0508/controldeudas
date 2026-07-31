@@ -21,7 +21,7 @@ initNav();
 initGlobalSearch();
 
 document.body.addEventListener('click', e => {
-  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-verdebt],[data-newdebt],[data-quickpago]');
+  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-consumo],[data-ajuste],[data-verdebt],[data-newdebt],[data-quickpago],[data-quickconsumo]');
   if (!t) return;
   if (t.hasAttribute('data-newcut')) openCut(t.dataset.newcut || null, null);
   else if (t.hasAttribute('data-editcut')) openCut(null, t.dataset.editcut);
@@ -29,10 +29,13 @@ document.body.addEventListener('click', e => {
   else if (t.hasAttribute('data-strat')) { DB.settings.strategy = t.dataset.strat; save(); renderInicio(); }
   else if (t.hasAttribute('data-goto')) showTab(t.dataset.goto);
   else if (t.hasAttribute('data-editcreditor')) openCreditor(t.dataset.editcreditor);
-  else if (t.hasAttribute('data-pagar')) openPago(t.dataset.pagar, () => renderAll());
+  else if (t.hasAttribute('data-pagar')) openPago(t.dataset.pagar, () => renderAll(), 'pago');
+  else if (t.hasAttribute('data-consumo')) openPago(t.dataset.consumo, () => renderAll(), 'consumo');
+  else if (t.hasAttribute('data-ajuste')) openPago(t.dataset.ajuste, () => renderAll(), 'ajuste');
   else if (t.hasAttribute('data-verdebt')) openDebtDetail(t.dataset.verdebt);
   else if (t.hasAttribute('data-newdebt')) openDebt(null);
-  else if (t.hasAttribute('data-quickpago')) openQuickPago(() => renderAll());
+  else if (t.hasAttribute('data-quickpago')) openQuickPago(() => renderAll(), 'pago');
+  else if (t.hasAttribute('data-quickconsumo')) openQuickPago(() => renderAll(), 'consumo');
 });
 document.body.addEventListener('click', e => {
   if (e.target.id === 'btnNewDebt') openDebt(null);

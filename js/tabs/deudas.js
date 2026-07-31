@@ -87,6 +87,8 @@ export function renderDeudas() {
             <div class="row-menu-pop">
               <button type="button" data-verdebt="${d.id}">Ver detalle</button>
               <button type="button" data-pagar="${d.id}">Registrar pago</button>
+              <button type="button" data-consumo="${d.id}">Registrar consumo</button>
+              <button type="button" data-ajuste="${d.id}">Ajustar saldo</button>
               <button type="button" data-editdebt="${d.id}">Editar</button>
             </div>
           </details>
@@ -155,7 +157,7 @@ export function openDebt(id, preselectCreditorId) {
     <div style="margin-top:12px"><label>Notas</label><textarea id="dNotes" rows="2" placeholder="Fecha de corte, número de cuenta, condiciones…">${d.notes || ''}</textarea></div>
     ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:13px;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>
     <hr style="margin:16px 0 10px">
-    <h3 style="margin-bottom:4px">Historial de pagos</h3>
+    <h3 style="margin-bottom:4px">Historial de movimientos</h3>
     ${paymentsHistoryHTML(id)}` : ''}
     <div class="modal-foot">
       ${id ? '<button class="btn danger" id="dDelete" style="margin-right:auto">Eliminar</button>' : ''}
@@ -226,15 +228,19 @@ export function openDebtDetail(id) {
       ${c.email ? `<p class="dim" style="font-size:13px;margin:2px 0 0">${c.email}</p>` : ''}
       ${!c.phone && !c.email ? `<p class="dim" style="font-size:13px;margin:4px 0 0">Sin datos de contacto — completalos en Acreedores.</p>` : ''}
     </div>` : ''}
-    <h3 style="margin-bottom:4px">Historial de pagos</h3>
+    <h3 style="margin-bottom:4px">Historial de movimientos</h3>
     ${paymentsHistoryHTML(id)}
     <div class="modal-foot">
       <button class="btn" data-close>Cerrar</button>
-      <button class="btn" id="vdPagar">Registrar pago</button>
+      <button class="btn" id="vdAjuste">Ajustar saldo</button>
+      <button class="btn" id="vdConsumo">Consumo</button>
+      <button class="btn" id="vdPagar">Pago</button>
       <button class="btn primary" id="vdEditar">Editar</button>
     </div>
   `);
   wirePaymentsHistory(() => openDebtDetail(id));
   document.getElementById('vdEditar').onclick = () => openDebt(id);
-  document.getElementById('vdPagar').onclick = () => openPago(id, () => openDebtDetail(id));
+  document.getElementById('vdPagar').onclick = () => openPago(id, () => openDebtDetail(id), 'pago');
+  document.getElementById('vdConsumo').onclick = () => openPago(id, () => openDebtDetail(id), 'consumo');
+  document.getElementById('vdAjuste').onclick = () => openPago(id, () => openDebtDetail(id), 'ajuste');
 }
