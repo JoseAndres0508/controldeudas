@@ -129,6 +129,16 @@ label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;
 .toast-success{background:var(--up)}
 .toast-error{background:var(--down)}
 
+/* ---------- menú de acciones por fila ---------- */
+.row-menu{position:relative;display:inline-block}
+.row-menu>summary{list-style:none;cursor:pointer;font-family:var(--mono);font-size:15px;line-height:1;color:var(--ink-2);padding:5px 9px;border-radius:var(--r);border:1px solid transparent;user-select:none}
+.row-menu>summary::-webkit-details-marker{display:none}
+.row-menu>summary:hover{background:var(--paper);color:var(--ink)}
+.row-menu[open]>summary{background:var(--paper);border-color:var(--rule);color:var(--ink)}
+.row-menu-pop{position:absolute;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--rule);border-radius:8px;box-shadow:0 10px 24px rgba(16,20,24,.16);padding:4px;min-width:132px;z-index:40;display:flex;flex-direction:column;gap:1px}
+.row-menu-pop button{background:none;border:0;text-align:left;font-family:var(--sans);font-size:13px;color:var(--ink);padding:7px 10px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.row-menu-pop button:hover{background:var(--paper)}
+
 /* ---------- buscador global ---------- */
 .search-wrap{position:relative;margin:0 14px 10px}
 .search-wrap input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--rule);border-radius:7px;background:var(--card);color:var(--ink)}

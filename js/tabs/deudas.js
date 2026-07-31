@@ -20,6 +20,9 @@ const FILTERS = [
 ];
 let searchText = '';
 let statusFilter = 'activa';
+/** Las columnas secundarias (tipo, cuota, fin estimado) quedan ocultas
+ *  por defecto para que la tabla no abrume; se muestran con el toggle. */
+let showDetails = false;
 
 function finEstimadoHTML(d, crc) {
   const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
@@ -51,6 +54,7 @@ export function renderDeudas() {
       <div class="seg">
         ${FILTERS.map(f => `<button data-filter="${f.key}" aria-pressed="${statusFilter === f.key}">${f.label}</button>`).join('')}
       </div>
+      <button class="btn ghost" id="btnToggleDetails" style="margin-left:auto">${showDetails ? 'Ocultar detalles' : 'Mostrar detalles'}</button>
     </div>`;
 
   const rows = DB.debts
@@ -63,7 +67,7 @@ export function renderDeudas() {
     html += `<div class="empty">Ninguna deuda coincide con la búsqueda o el filtro.</div>`;
   } else {
     html += `<table><thead><tr>
-      <th></th><th>Deuda</th><th class="hide-sm">Tipo</th><th class="ta-r">Tasa anual</th><th class="ta-r hide-sm">Cuota mínima</th><th class="ta-r">Saldo actual</th><th class="hide-sm">Vencimiento</th><th class="ta-r hide-sm">Fin estimado</th><th class="ta-r"></th>
+      <th></th><th>Deuda</th>${showDetails ? '<th class="hide-sm">Tipo</th>' : ''}<th class="ta-r">Tasa anual</th>${showDetails ? '<th class="ta-r hide-sm">Cuota mínima</th>' : ''}<th class="ta-r">Saldo actual</th><th class="hide-sm">Vencimiento</th>${showDetails ? '<th class="ta-r hide-sm">Fin estimado</th>' : ''}<th class="ta-r"></th>
     </tr></thead><tbody>`;
     rows.forEach(({ d, crc }) => {
       const bal = lastBalance(d.id);
@@ -71,13 +75,22 @@ export function renderDeudas() {
       html += `<tr${st === 'pagada' ? ' style="opacity:.6"' : ''}>
         <td><span class="chip">${d.currency}</span></td>
         <td><strong style="font-weight:500">${d.name}</strong>${st === 'pagada' ? ' <span class="chip">pagada</span>' : ''}<br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
-        <td class="hide-sm"><span class="chip">${d.kind}</span></td>
+        ${showDetails ? `<td class="hide-sm"><span class="chip">${d.kind}</span></td>` : ''}
         <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
-        <td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>
+        ${showDetails ? `<td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>` : ''}
         <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
         <td class="hide-sm">${dueHTML(d)}</td>
-        <td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>
-        <td class="ta-r"><div class="btn-row" style="justify-content:flex-end"><button class="btn ghost" data-verdebt="${d.id}">Ver</button><button class="btn ghost" data-pagar="${d.id}">Pagar</button><button class="btn ghost" data-editdebt="${d.id}">Editar</button></div></td>
+        ${showDetails ? `<td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>` : ''}
+        <td class="ta-r">
+          <details class="row-menu">
+            <summary title="Acciones" aria-label="Acciones">⋯</summary>
+            <div class="row-menu-pop">
+              <button type="button" data-verdebt="${d.id}">Ver detalle</button>
+              <button type="button" data-pagar="${d.id}">Registrar pago</button>
+              <button type="button" data-editdebt="${d.id}">Editar</button>
+            </div>
+          </details>
+        </td>
       </tr>`;
     });
     html += `</tbody></table>`;
@@ -89,6 +102,16 @@ export function renderDeudas() {
   search.oninput = () => { searchText = search.value; renderDeudas(); search.focus(); search.setSelectionRange(search.value.length, search.value.length); };
   document.querySelectorAll('#tab-deudas [data-filter]').forEach(btn => {
     btn.onclick = () => { statusFilter = btn.dataset.filter; renderDeudas(); };
+  });
+  const toggle = document.getElementById('btnToggleDetails');
+  if (toggle) toggle.onclick = () => { showDetails = !showDetails; renderDeudas(); };
+
+  // Un solo menú abierto a la vez.
+  el.querySelectorAll('.row-menu').forEach(m => {
+    m.addEventListener('toggle', () => {
+      if (!m.open) return;
+      el.querySelectorAll('.row-menu[open]').forEach(o => { if (o !== m) o.open = false; });
+    });
   });
 }
 

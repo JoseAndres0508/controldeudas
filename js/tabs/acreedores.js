@@ -27,13 +27,17 @@ export function renderAcreedores() {
   if (!list.length) {
     html += `<div class="empty">${DB.creditors.length ? 'Ningún acreedor coincide con la búsqueda.' : 'Todavía no hay acreedores. Se crean automáticamente al agregar una deuda, o los agregás aquí.'}</div>`;
   } else {
-    html += `<table><thead><tr><th>Nombre</th><th class="hide-sm">Teléfono</th><th class="hide-sm">Correo</th><th class="ta-r">Deudas</th><th class="ta-r"></th></tr></thead><tbody>`;
+    html += `<table><thead><tr><th>Nombre</th><th class="hide-sm">Contacto</th><th class="ta-r">Deudas</th><th class="ta-r"></th></tr></thead><tbody>`;
     list.forEach(c => {
       const count = DB.debts.filter(d => d.creditorId === c.id && !d.archived).length;
+      // Teléfono y correo en una sola celda: casi siempre uno de los dos
+      // está vacío, y dos columnas de guiones no aportan nada.
+      const contacto = [c.phone, c.email].filter(Boolean);
       html += `<tr>
         <td><strong style="font-weight:500">${c.name}</strong></td>
-        <td class="hide-sm">${c.phone || '<span class="dim">—</span>'}</td>
-        <td class="hide-sm">${c.email || '<span class="dim">—</span>'}</td>
+        <td class="hide-sm">${contacto.length
+          ? contacto.map(v => `<span style="font-size:13px">${v}</span>`).join('<br>')
+          : '<span class="dim">Sin datos de contacto</span>'}</td>
         <td class="ta-r num">${count}</td>
         <td class="ta-r"><button class="btn ghost" data-editcreditor="${c.id}">Editar</button></td>
       </tr>`;

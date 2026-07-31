@@ -39,6 +39,14 @@ document.body.addEventListener('click', e => {
   else if (e.target.id === 'btnNewCreditor') openCreditor(null);
 });
 
+/* Cierra los menús "⋯" de las filas al hacer clic fuera o al elegir una acción. */
+document.body.addEventListener('click', e => {
+  const inside = e.target.closest('.row-menu');
+  document.querySelectorAll('.row-menu[open]').forEach(m => {
+    if (m !== inside || e.target.closest('.row-menu-pop')) m.open = false;
+  });
+});
+
 document.getElementById('btnExport').onclick = exportJSON;
 document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();
 document.getElementById('fileImport').onchange = e => { if (e.target.files[0]) importJSON(e.target.files[0]); };
