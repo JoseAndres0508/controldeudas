@@ -57,10 +57,20 @@ document.body.addEventListener('click', e => {
   });
 });
 
+const pickImportFile = () => document.getElementById('fileImport').click();
+
 document.getElementById('btnExport').onclick = exportJSON;
-document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();
+document.getElementById('btnImport').onclick = pickImportFile;
 document.getElementById('fileImport').onchange = e => { if (e.target.files[0]) importJSON(e.target.files[0]); };
 document.getElementById('btnSettings').onclick = openSettings;
+
+/* Atajos del pie de página. Usan data-act en vez de repetir los id de
+   arriba, porque un id duplicado rompería getElementById. */
+const FOOT_ACTIONS = { export: exportJSON, import: pickImportFile, settings: openSettings };
+document.body.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (b && FOOT_ACTIONS[b.dataset.act]) FOOT_ACTIONS[b.dataset.act]();
+});
 
 /** Al arrancar: si hay un archivo conectado y con permiso vigente,
  *  lo lee y lo toma como fuente de verdad antes del primer render. */

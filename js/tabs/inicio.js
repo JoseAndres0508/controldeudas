@@ -1,5 +1,5 @@
 import { DB } from '../state.js';
-import { activeDebts, debtById, debtReductions, fmtBase, fmtCRC, fmtDateLong, lastBalance, overallProgress, toCRC } from '../utils.js';
+import { activeDebts, debtById, debtReductions, fmtBase, fmtCRC, fmtDateLong, fmtPeriods, lastBalance, overallProgress, toCRC } from '../utils.js';
 import { heroHTML, tapeHTML } from '../header.js';
 import { simulate } from './estrategia.js';
 import { chartsSectionHTML, drawCharts } from './historial.js';
@@ -40,7 +40,7 @@ export function renderInicio() {
 
   const overall = overallProgress();
   html += `<div class="stat-row">
-    <div class="stat"><div class="k">Libre en</div><div class="v">${sim && sim.reached ? sim.months + ' meses' : '—'}</div></div>
+    <div class="stat"><div class="k">Libre en</div><div class="v" style="font-size:.9375rem">${sim && sim.reached ? fmtPeriods(sim.periods) : '—'}</div>${sim && sim.reached ? `<div class="dim" style="font-size:.6875rem">al ${fmtDateLong(sim.endDate)}</div>` : ''}</div>
     <div class="stat"><div class="k">Avance total</div><div class="v">${overall && overall.pct !== null ? overall.pct.toFixed(1) + '%' : '—'}</div></div>
     <div class="stat"><div class="k">La que más bajó</div><div class="v" style="font-size:.9375rem">${best ? best.d.name : '—'}</div></div>
   </div>`;

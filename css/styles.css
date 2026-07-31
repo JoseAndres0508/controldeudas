@@ -112,17 +112,37 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus
   height:100%;display:flex;align-items:center;justify-content:space-between;
   gap:16px;padding:0 20px;max-width:1760px;margin:0 auto;
 }
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:0}
 .brand-mark{
-  width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--paper);
+  width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--paper);
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-weight:600;font-size:.9375rem;flex-shrink:0;
+  font-family:var(--mono);font-weight:600;font-size:1rem;flex-shrink:0;
+  box-shadow:0 0 0 3px var(--ring);
 }
-.brand-name{
-  font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ink-3);line-height:1.25;white-space:nowrap;
+.brand-text{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand-name{font-size:.9375rem;font-weight:600;letter-spacing:-.015em;white-space:nowrap}
+.brand-tag{
+  font-family:var(--mono);font-size:.5625rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);white-space:nowrap;margin-top:2px;
 }
+
+/* Buscador centrado en el header (antes vivía apretado en la barra lateral). */
+.header-search{flex:1;max-width:420px;margin:0 auto}
+
 .header-tools{display:flex;align-items:center;gap:10px;flex-shrink:0}
+
+/* Indicador vivo de deuda total + avance */
+.pulse{display:flex;align-items:center;gap:8px}
+.pulse-btn{
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+  background:none;border:0;cursor:pointer;padding:4px 8px;border-radius:var(--r);color:var(--ink);
+}
+.pulse-btn:hover{background:var(--paper)}
+.pulse-k{font-family:var(--mono);font-size:.5625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.pulse-v{font-size:.875rem;font-weight:500;white-space:nowrap}
+.pulse-bar{width:100%;min-width:70px;height:3px;background:var(--rule-soft);border-radius:2px;overflow:hidden;margin-top:2px}
+.pulse-fill{display:block;height:100%;background:var(--down);border-radius:2px}
+.pulse-pct{font-size:.75rem;color:var(--down);font-weight:500}
 /* Control de tamaño de letra */
 .fs-control{display:inline-flex;border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
 .fs-control button{
@@ -285,8 +305,9 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
 .row-menu-pop button:hover{background:var(--paper)}
 
 /* ---------- buscador global ---------- */
-.search-wrap{position:relative;margin:0 12px 12px}
-.search-wrap input{font-size:.8125rem;padding:8px 10px}
+.search-wrap{position:relative}
+.search-wrap input{font-size:.8125rem;padding:8px 12px;border-radius:20px;background:var(--paper)}
+.search-wrap input:focus{background:var(--card)}
 .search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--rule);border-radius:8px;box-shadow:var(--shadow-md);max-height:340px;overflow-y:auto;z-index:60;display:none}
 .search-results.open{display:block}
 .search-item{display:block;width:100%;text-align:left;padding:9px 12px;border:none;background:none;cursor:pointer;border-bottom:1px solid var(--rule-soft);font-family:var(--sans);color:var(--ink)}
@@ -319,16 +340,31 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
 .mini-row .mini-val{font-size:.875rem;font-weight:500;white-space:nowrap}
 
 /* ---------- footer ---------- */
-.app-footer{flex-shrink:0;background:var(--card);border-top:1px solid var(--rule);padding:20px 0}
+.app-footer{flex-shrink:0;background:var(--card);border-top:1px solid var(--rule);margin-top:24px}
 .app-footer-in{
-  max-width:1760px;margin:0 auto;padding:0 24px;
-  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  max-width:1760px;margin:0 auto;padding:32px 24px 26px;
+  display:grid;gap:32px;
+  grid-template-columns:minmax(240px,2fr) repeat(3,minmax(130px,1fr));
 }
-.app-footer p{margin:0;font-size:.8125rem;color:var(--ink-2)}
-.app-footer .foot-meta{font-family:var(--mono);font-size:.6875rem;color:var(--ink-3)}
-.foot-nav{display:flex;gap:18px;flex-wrap:wrap}
-.foot-nav a{font-size:.8125rem;color:var(--ink-2);text-decoration:none;border-bottom:1px solid transparent}
-.foot-nav a:hover{color:var(--ink);border-bottom-color:var(--rule)}
+.foot-brand .brand{margin-bottom:12px}
+.foot-brand p{margin:0;font-size:.8125rem;color:var(--ink-2);max-width:42ch;line-height:1.6}
+.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+.foot-col h3{
+  font-family:var(--mono);font-size:.5625rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;margin-bottom:2px;
+}
+.foot-col a,.foot-col button{
+  font-family:var(--sans);font-size:.8125rem;color:var(--ink-2);text-decoration:none;
+  background:none;border:0;padding:0;cursor:pointer;text-align:left;
+  border-bottom:1px solid transparent;line-height:1.3;
+}
+.foot-col a:hover,.foot-col button:hover{color:var(--ink);border-bottom-color:var(--rule)}
+.foot-bar{
+  border-top:1px solid var(--rule-soft);
+  max-width:1760px;margin:0 auto;padding:14px 24px;
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.foot-meta{font-family:var(--mono);font-size:.6875rem;color:var(--ink-3)}
 
 /* =========================================================
    RESPONSIVE
@@ -342,6 +378,12 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
 
 /* Tablet / móvil: la barra lateral pasa a ser una tira horizontal
    debajo del header, con los iconos como única etiqueta visible. */
+/* El pie pasa a dos columnas antes de apilarse del todo. */
+@media(max-width:960px){
+  .app-footer-in{grid-template-columns:1fr 1fr;gap:26px}
+  .foot-brand{grid-column:1/-1}
+}
+
 @media(max-width:860px){
   :root{--header-h:52px}
   .shell{flex-direction:column;align-items:stretch}
@@ -350,7 +392,6 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
     flex-direction:row;align-items:center;padding:8px 10px;gap:8px;
     border-right:0;border-bottom:1px solid var(--rule);
   }
-  .search-wrap{margin:0;flex:1;min-width:120px;max-width:280px}
   .side-nav{flex-direction:row;flex:none;padding:0;gap:2px;overflow-x:auto;scrollbar-width:none}
   .side-nav::-webkit-scrollbar{display:none}
   .side-nav button{padding:9px 11px}
@@ -358,15 +399,20 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
   .side-foot{border-top:0;border-left:1px solid var(--rule-soft);margin-top:0;padding:0 0 0 8px}
   .side-link span{display:none}
   .content{padding:20px 16px 48px}
-  .brand-name{display:none}
+  .brand-tag{display:none}
+  /* El indicador ocupa mucho: se queda sólo el monto. */
+  .pulse-bar,.pulse-pct{display:none}
+  .header-search{max-width:none}
 }
 
-/* Móvil: header más compacto y controles reordenados. */
+/* Móvil: header compacto. El buscador cede el paso a los controles. */
 @media(max-width:640px){
   .app-header-in{gap:10px;padding:0 12px}
   .header-tools{gap:6px}
   .icon-btn span{display:none}
   .icon-btn{padding:7px 9px}
+  .pulse{display:none}
+  .brand-text{display:none}
   .content{padding:16px 12px 40px}
   .content-head{margin-bottom:16px}
   .card{padding:14px 14px}
@@ -380,14 +426,13 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
   .modal{padding:16px 16px 18px}
   .modal-foot{justify-content:stretch}
   .modal-foot button{flex:1}
-  .app-footer-in{flex-direction:column;align-items:flex-start;gap:10px;padding:0 12px}
+  .app-footer-in{grid-template-columns:1fr;gap:22px;padding:24px 12px 20px}
+  .foot-bar{flex-direction:column;gap:6px;padding:12px}
   .toast-wrap{right:12px;left:12px;bottom:12px;max-width:none}
 }
 
-/* Pantallas muy angostas: la tira de navegación se vuelve scroll puro. */
 @media(max-width:420px){
-  .brand-mark{width:26px;height:26px}
-  .search-wrap{max-width:none}
+  .brand-mark{width:28px;height:28px;font-size:.875rem}
   .stat-row{grid-template-columns:1fr 1fr}
   .fs-control button{padding:5px 8px}
 }

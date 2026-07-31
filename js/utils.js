@@ -16,8 +16,50 @@ export const fmtBase = crcAmount => {
   return base === 'USD' ? fmtUSD(crcAmount / (DB.settings.fx || 512)) : fmtCRC(crcAmount);
 };
 export const parseNum = s => { if (s === '' || s === null || s === undefined) return null; const v = parseFloat(String(s).replace(/[^0-9.\-]/g, '')); return isNaN(v) ? null : v; };
-/** Fecha ISO de hoy + n meses (para proyectar fechas de pago). */
-export const addMonthsISO = n => { const d = new Date(); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); };
+
+/* =========================================================
+   CALENDARIO DE PAGOS
+   Sólo se abona los días 15 y 30 de cada mes. Todo el sistema
+   —cortes, proyecciones y fechas de salida— se mueve sobre
+   esas dos fechas, así que hay 24 oportunidades de pago al año,
+   no 12. En los meses sin día 30 (febrero) cae en el último día.
+   ========================================================= */
+export const PAY_DAYS = [15, 30];
+export const PERIODS_PER_YEAR = 24;   // dos quincenas por mes
+
+/** El día de pago real de ese mes: 15 tal cual, y 30 recortado
+ *  al último día si el mes es más corto. */
+export function payDateInMonth(year, month, day) {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  return new Date(year, month, Math.min(day, lastDay));
+}
+
+/** La n-ésima fecha de pago contando desde `from` (n = 1 es la próxima).
+ *  Devuelve ISO 'YYYY-MM-DD', o null si se pasa del horizonte. */
+export function payDateAfter(n, from = new Date()) {
+  if (!n || n < 1) return null;
+  const start = new Date(from); start.setHours(0, 0, 0, 0);
+  let year = start.getFullYear(), month = start.getMonth(), found = 0;
+  for (let guard = 0; guard < 1200; guard++) {
+    for (const day of PAY_DAYS) {
+      const cand = payDateInMonth(year, month, day);
+      if (cand > start && ++found === n) {
+        return `${cand.getFullYear()}-${String(cand.getMonth() + 1).padStart(2, '0')}-${String(cand.getDate()).padStart(2, '0')}`;
+      }
+    }
+    if (++month > 11) { month = 0; year++; }
+  }
+  return null;
+}
+
+/** Texto corto de una cantidad de quincenas: "18 meses", "1 mes y medio". */
+export function fmtPeriods(periods) {
+  const months = Math.floor(periods / 2);
+  const half = periods % 2 === 1;
+  if (months === 0) return half ? 'medio mes' : '—';
+  const base = `${months} ${months === 1 ? 'mes' : 'meses'}`;
+  return half ? `${base} y medio` : base;
+}
 
 export const sortedPeriods = () => [...DB.periods].sort((a, b) => a.date.localeCompare(b.date));
 export const activeDebts = () => DB.debts.filter(d => !d.archived);

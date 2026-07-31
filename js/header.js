@@ -1,4 +1,29 @@
-import { activeDebts, fmtBase, fmtCRC, fmtDate, fmtDateLong, fmtSigned, series } from './utils.js';
+import { activeDebts, fmtBase, fmtCRC, fmtDate, fmtDateLong, fmtSigned, lastBalance, overallProgress, pendingCutDate, series, toCRC } from './utils.js';
+
+/* =========================================================
+   INDICADOR DEL HEADER
+   Deuda total y avance, siempre visibles sin importar en qué
+   pestaña estés. Se repinta desde render-all.js con cada cambio.
+   ========================================================= */
+export function renderHeaderPulse() {
+  const el = document.getElementById('headerPulse');
+  if (!el) return;
+
+  const total = activeDebts().reduce((s, d) => s + toCRC(lastBalance(d.id), d.currency), 0);
+  const prog = overallProgress();
+  const pct = prog && prog.pct !== null ? prog.pct : null;
+  const pending = pendingCutDate();
+
+  el.innerHTML = `
+    <button type="button" class="pulse-btn" data-goto="reportes"
+            title="${pct !== null ? `Llevás ${pct.toFixed(1)}% pagado. Ir a Reportes` : 'Ir a Reportes'}">
+      <span class="pulse-k">Deuda total${pending ? ' · falta corte' : ''}</span>
+      <span class="pulse-v num">${fmtBase(total)}</span>
+      ${pct !== null ? `<span class="pulse-bar" aria-hidden="true"><span class="pulse-fill" style="width:${pct}%"></span></span>` : ''}
+    </button>
+    ${pct !== null ? `<span class="pulse-pct num" aria-label="Avance total ${pct.toFixed(1)} por ciento">${pct.toFixed(0)}%</span>` : ''}
+  `;
+}
 
 /* =========================================================
    HERO + CINTA DE CORTES

@@ -1,5 +1,5 @@
 import { DB, save } from '../state.js';
-import { activeDebts, addMonthsISO, creditorById, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
+import { activeDebts, creditorById, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
@@ -28,7 +28,8 @@ function finEstimadoHTML(d, crc) {
   const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
   if (!proj) return '<span class="chip warn">falta dato</span>';
   if (!proj.reached) return '<span class="chip warn">cuota insuficiente</span>';
-  return fmtDateLong(addMonthsISO(proj.months));
+  // La fecha siempre cae en un 15 o un 30: son los únicos días de abono.
+  return fmtDateLong(proj.endDate);
 }
 
 function dueHTML(d) {
@@ -255,7 +256,7 @@ export function openDebtDetail(id) {
       <div class="stat"><div class="k">Saldo actual</div><div class="v">${fmtMoney(bal, d.currency)}</div></div>
       <div class="stat"><div class="k">Tasa anual</div><div class="v">${d.rate != null ? d.rate.toFixed(2) + '%' : '—'}</div></div>
       <div class="stat"><div class="k">Cuota mínima</div><div class="v" style="font-size:.9375rem">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '—'}</div></div>
-      <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:.9375rem">${proj && proj.reached ? fmtDateLong(addMonthsISO(proj.months)) : '—'}</div></div>
+      <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:.9375rem">${proj && proj.reached ? fmtDateLong(proj.endDate) : '—'}</div></div>
     </div>
     ${progressCardHTML(d, prog)}
     ${c ? `<div class="card">

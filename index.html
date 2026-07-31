@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Libro de deudas — control personal de deudas, cortes y pagos.">
+<meta name="description" content="Saldo Cero — control personal de deudas, cortes y abonos de quincena.">
 <meta name="color-scheme" content="light dark">
-<title>Libro de deudas</title>
+<title>Saldo Cero</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <!-- El ?v= obliga al navegador a bajar la hoja de estilos nueva en vez de
      usar la que tiene guardada. Subí el número cada vez que cambie el CSS. -->
-<link rel="stylesheet" href="css/styles.css?v=7">
+<link rel="stylesheet" href="css/styles.css?v=8">
 <script>
   /* Aplica tema y tamaño de letra antes de pintar, para que no haya
      un parpadeo claro→oscuro al cargar la página. */
@@ -32,11 +32,25 @@
 <header class="app-header">
   <div class="app-header-in">
     <div class="brand">
-      <div class="brand-mark" aria-hidden="true">₡</div>
-      <div class="brand-name">Libro de<br>deudas</div>
+      <div class="brand-mark" aria-hidden="true">0</div>
+      <div class="brand-text">
+        <span class="brand-name">Saldo Cero</span>
+        <span class="brand-tag">abonos los 15 y 30</span>
+      </div>
+    </div>
+
+    <div class="search-wrap header-search">
+      <label class="sr-only" for="globalSearch">Buscar deuda o acreedor</label>
+      <input id="globalSearch" type="search" placeholder="Buscar deuda o acreedor…" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="globalSearchResults" aria-autocomplete="list">
+      <div class="search-results" id="globalSearchResults" role="listbox" aria-label="Resultados de búsqueda"></div>
     </div>
 
     <div class="header-tools">
+      <!-- Indicador vivo: deuda total y avance, visible desde cualquier pestaña.
+           Lo llena renderHeaderPulse() en js/header.js. -->
+      <div class="pulse" id="headerPulse"></div>
+
       <div class="fs-control" role="group" aria-label="Tamaño de letra">
         <button type="button" class="fs-a-sm" data-fs="sm" aria-pressed="false" title="Letra pequeña">A</button>
         <button type="button" class="fs-a-md" data-fs="md" aria-pressed="true" title="Letra normal">A</button>
@@ -55,13 +69,6 @@
 <div class="shell">
 
 <aside class="sidebar">
-  <div class="search-wrap">
-    <label class="sr-only" for="globalSearch">Buscar deuda o acreedor</label>
-    <input id="globalSearch" type="search" placeholder="Buscar…" autocomplete="off"
-           role="combobox" aria-expanded="false" aria-controls="globalSearchResults" aria-autocomplete="list">
-    <div class="search-results" id="globalSearchResults" role="listbox" aria-label="Resultados de búsqueda"></div>
-  </div>
-
   <nav class="side-nav" role="tablist" aria-label="Secciones">
     <button role="tab" id="tabbtn-inicio" data-tab="inicio" aria-selected="true" aria-controls="tab-inicio" tabindex="0">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
@@ -119,14 +126,49 @@
 
 <footer class="app-footer">
   <div class="app-footer-in">
-    <p><strong style="font-weight:500">Libro de deudas</strong> — control personal de deudas, cortes y pagos.</p>
-    <nav class="foot-nav" aria-label="Enlaces del pie de página">
-      <a href="#main">Ayuda</a>
-      <a href="#main">Privacidad</a>
-      <a href="#main">Términos</a>
-      <a href="#main">Contacto</a>
+
+    <div class="foot-brand">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">0</div>
+        <div class="brand-text">
+          <span class="brand-name">Saldo Cero</span>
+          <span class="brand-tag">libro de deudas</span>
+        </div>
+      </div>
+      <p>Llevá tus deudas, cortes y abonos en un solo lugar. Los pagos se registran los <strong>15</strong> y los <strong>30</strong> de cada mes, y todas las proyecciones se calculan sobre esas fechas.</p>
+    </div>
+
+    <nav class="foot-col" aria-label="Secciones del sistema">
+      <h3>El sistema</h3>
+      <button type="button" data-goto="inicio">Inicio</button>
+      <button type="button" data-goto="deudas">Ingresar deudas</button>
+      <button type="button" data-goto="cortes">Cortes</button>
+      <button type="button" data-goto="estrategia">Estrategia</button>
+      <button type="button" data-goto="acreedores">Acreedores</button>
+      <button type="button" data-goto="reportes">Reportes</button>
     </nav>
-    <p class="foot-meta">v0.5.0 · Datos guardados en este dispositivo · © 2026</p>
+
+    <nav class="foot-col" aria-label="Acciones sobre tus datos">
+      <h3>Tus datos</h3>
+      <button type="button" data-act="export">Exportar respaldo</button>
+      <button type="button" data-act="import">Importar respaldo</button>
+      <button type="button" data-act="settings">Ajustes</button>
+      <button type="button" data-goto="reportes">Exportar Excel o PDF</button>
+    </nav>
+
+    <div class="foot-col">
+      <h3>Referencia</h3>
+      <a href="#main">Guía rápida</a>
+      <a href="#main">Avalancha vs. bola de nieve</a>
+      <a href="#main">Privacidad</a>
+      <a href="#main">Contacto</a>
+    </div>
+
+  </div>
+
+  <div class="foot-bar">
+    <span class="foot-meta">v0.6.0 · Tus datos viven en este dispositivo</span>
+    <span class="foot-meta">Hecho en Costa Rica · © 2026</span>
   </div>
 </footer>
 
@@ -138,6 +180,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script type="module" src="js/main.js?v=7"></script>
+<script type="module" src="js/main.js?v=8"></script>
 </body>
 </html>
