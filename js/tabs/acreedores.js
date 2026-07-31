@@ -3,6 +3,8 @@ import { creditorById } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
+import { confirmDialog } from '../confirmDialog.js';
+import { toast } from '../toast.js';
 
 /* =========================================================
    PESTAÑA: ACREEDORES
@@ -79,13 +81,14 @@ export function openCreditor(id, onSaved) {
     if (onSaved) onSaved(saved); else renderAll();
   };
   const del = document.getElementById('cDelete');
-  if (del) del.onclick = () => {
+  if (del) del.onclick = async () => {
     const msg = debtCount
       ? `Este acreedor está asociado a ${debtCount} deuda${debtCount > 1 ? 's' : ''}; quedarán sin acreedor asignado. ¿Eliminar de todas formas?`
       : '¿Eliminar este acreedor?';
-    if (!confirm(msg)) return;
+    if (!(await confirmDialog(msg))) return;
     DB.creditors = DB.creditors.filter(x => x.id !== id);
     DB.debts.forEach(d => { if (d.creditorId === id) d.creditorId = null; });
     save(); closeModal(); renderAll();
+    toast('Acreedor eliminado.', 'success');
   };
 }

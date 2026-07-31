@@ -1,6 +1,7 @@
 import { DB } from './state.js';
 import { activeDebts, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
 import { debtStatus, totalPaidCRC } from './payments.js';
+import { toast } from './toast.js';
 
 /* =========================================================
    EXPORTAR A EXCEL / PDF
@@ -8,7 +9,7 @@ import { debtStatus, totalPaidCRC } from './payments.js';
    cargaron (sin internet, bloqueados), avisa en vez de fallar.
    ========================================================= */
 export function exportExcel() {
-  if (!window.XLSX) { alert('La librería de Excel no cargó (revisá tu conexión) — probá de nuevo o usá "Exportar respaldo" en Ajustes.'); return; }
+  if (!window.XLSX) { toast('La librería de Excel no cargó (revisá tu conexión) — probá de nuevo o usá "Exportar respaldo" en Ajustes.', 'error'); return; }
   const wb = XLSX.utils.book_new();
 
   const debtRows = DB.debts.map(d => ({
@@ -40,7 +41,7 @@ export function exportExcel() {
 }
 
 export function exportPDF() {
-  if (!window.jspdf) { alert('La librería de PDF no cargó (revisá tu conexión) — probá de nuevo o usá "Exportar respaldo" en Ajustes.'); return; }
+  if (!window.jspdf) { toast('La librería de PDF no cargó (revisá tu conexión) — probá de nuevo o usá "Exportar respaldo" en Ajustes.', 'error'); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 

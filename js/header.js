@@ -1,4 +1,4 @@
-import { activeDebts, fmtCRC, fmtDate, fmtDateLong, fmtSigned, series } from './utils.js';
+import { activeDebts, fmtBase, fmtCRC, fmtDate, fmtDateLong, fmtSigned, series } from './utils.js';
 
 /* =========================================================
    HERO + CINTA DE CORTES
@@ -11,7 +11,7 @@ export function heroHTML() {
   if (!last) {
     return `<div class="card hero-card">
       <div class="eyebrow">Deuda total</div>
-      <div class="fig num">${fmtCRC(0)}</div>
+      <div class="fig num">${fmtBase(0)}</div>
       <div class="sub">Sin cortes todavía</div>
     </div>`;
   }
@@ -22,7 +22,7 @@ export function heroHTML() {
   }
   return `<div class="card hero-card">
     <div class="eyebrow">Deuda total</div>
-    <div class="fig num">${fmtCRC(last.total)}</div>
+    <div class="fig num">${fmtBase(last.total)}</div>
     <div class="sub">al ${fmtDateLong(last.date)} · ${activeDebts().length} deudas activas ${deltaHTML}</div>
   </div>`;
 }

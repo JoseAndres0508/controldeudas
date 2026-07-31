@@ -1,5 +1,5 @@
-import { activeDebts, debtsByCreditor, fmtCRC, fmtDateLong, lastBalance, toCRC } from '../utils.js';
-import { dueInfo, STATUS_LABEL, totalPaidCRC } from '../payments.js';
+import { activeDebts, debtsByCreditor, fmtBase, fmtCRC, fmtDateLong, lastBalance, toCRC } from '../utils.js';
+import { dueInfo, statusDotHTML, totalPaidCRC } from '../payments.js';
 import { exportExcel, exportPDF } from '../reportExport.js';
 
 /* =========================================================
@@ -18,8 +18,8 @@ export function renderReportes() {
   let html = '';
 
   html += `<div class="stat-row">
-    <div class="stat"><div class="k">Total adeudado</div><div class="v">${fmtCRC(totalDebt)}</div></div>
-    <div class="stat"><div class="k">Total pagado (histórico)</div><div class="v">${fmtCRC(totalPaid)}</div></div>
+    <div class="stat"><div class="k">Total adeudado</div><div class="v">${fmtBase(totalDebt)}</div></div>
+    <div class="stat"><div class="k">Total pagado (histórico)</div><div class="v">${fmtBase(totalPaid)}</div></div>
     <div class="stat"><div class="k">Deudas vencidas</div><div class="v">${vencidas.length}</div></div>
   </div>`;
 
@@ -38,7 +38,7 @@ export function renderReportes() {
     <div class="card-head"><h2>Deudas vencidas</h2></div>
     ${vencidas.length ? `<table><thead><tr><th></th><th>Deuda</th><th class="hide-sm">Venció el</th><th class="ta-r">Saldo</th></tr></thead><tbody>
       ${vencidas.map(({ d, info }) => `<tr>
-        <td><span class="dot vencido" title="${STATUS_LABEL.vencido}"></span></td>
+        <td>${statusDotHTML(info)}</td>
         <td>${d.name}</td>
         <td class="hide-sm num">${fmtDateLong(info.date)}</td>
         <td class="ta-r num">${fmtCRC(toCRC(lastBalance(d.id), d.currency))}</td>

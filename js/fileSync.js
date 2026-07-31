@@ -1,4 +1,5 @@
 import { clearHandle, getSavedHandle, saveHandle } from './fileHandle.js';
+import { toast } from './toast.js';
 
 /* =========================================================
    SINCRONIZACIÓN CON UN ARCHIVO REAL (File System Access API)
@@ -74,5 +75,8 @@ export async function writeFile(data) {
     const writable = await handle.createWritable();
     await writable.write(JSON.stringify(data, null, 2));
     await writable.close();
-  } catch (e) { console.warn('No se pudo guardar en el archivo conectado', e); }
+  } catch (e) {
+    console.warn('No se pudo guardar en el archivo conectado', e);
+    toast('No se pudo guardar en el archivo conectado. Revisá el permiso en Ajustes.', 'error');
+  }
 }

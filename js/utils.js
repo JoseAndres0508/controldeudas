@@ -10,6 +10,11 @@ export const fmtSigned = n => (n > 0 ? '+' : n < 0 ? '-' : '') + fmtCRC(Math.abs
 export const fmtDate = iso => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y.slice(2)}`; };
 export const fmtDateLong = iso => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
 export const toCRC = (amount, cur) => cur === 'USD' ? amount * (DB.settings.fx || 512) : amount;
+/** Convierte un monto en colones a la moneda base elegida en Ajustes y lo formatea. */
+export const fmtBase = crcAmount => {
+  const base = DB.settings.baseCurrency || 'CRC';
+  return base === 'USD' ? fmtUSD(crcAmount / (DB.settings.fx || 512)) : fmtCRC(crcAmount);
+};
 export const parseNum = s => { if (s === '' || s === null || s === undefined) return null; const v = parseFloat(String(s).replace(/[^0-9.\-]/g, '')); return isNaN(v) ? null : v; };
 /** Fecha ISO de hoy + n meses (para proyectar fechas de pago). */
 export const addMonthsISO = n => { const d = new Date(); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); };

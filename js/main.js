@@ -6,9 +6,10 @@ import { openCut } from './tabs/cortes.js';
 import { openDebt, openDebtDetail } from './tabs/deudas.js';
 import { renderInicio } from './tabs/inicio.js';
 import { openCreditor } from './tabs/acreedores.js';
-import { openPago } from './payments.js';
+import { openPago, openQuickPago } from './payments.js';
 import { exportJSON, importJSON, openSettings } from './settings.js';
 import { getStatus, readFile, tryRestore } from './fileSync.js';
+import { initGlobalSearch } from './globalSearch.js';
 
 /* =========================================================
    PUNTO DE ARRANQUE
@@ -17,9 +18,10 @@ import { getStatus, readFile, tryRestore } from './fileSync.js';
    ========================================================= */
 initModal();
 initNav();
+initGlobalSearch();
 
 document.body.addEventListener('click', e => {
-  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-verdebt]');
+  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-verdebt],[data-newdebt],[data-quickpago]');
   if (!t) return;
   if (t.hasAttribute('data-newcut')) openCut(t.dataset.newcut || null, null);
   else if (t.hasAttribute('data-editcut')) openCut(null, t.dataset.editcut);
@@ -29,6 +31,8 @@ document.body.addEventListener('click', e => {
   else if (t.hasAttribute('data-editcreditor')) openCreditor(t.dataset.editcreditor);
   else if (t.hasAttribute('data-pagar')) openPago(t.dataset.pagar, () => renderAll());
   else if (t.hasAttribute('data-verdebt')) openDebtDetail(t.dataset.verdebt);
+  else if (t.hasAttribute('data-newdebt')) openDebt(null);
+  else if (t.hasAttribute('data-quickpago')) openQuickPago(() => renderAll());
 });
 document.body.addEventListener('click', e => {
   if (e.target.id === 'btnNewDebt') openDebt(null);

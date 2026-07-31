@@ -5,6 +5,8 @@ import { Store } from '../store.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
 import { getFileName, getStatus, readFile, reconnect } from '../fileSync.js';
+import { confirmDialog } from '../confirmDialog.js';
+import { toast } from '../toast.js';
 
 /* =========================================================
    PESTAÑA: CORTES
@@ -119,11 +121,13 @@ export function openCut(dateOrNull, periodId) {
       else DB.periods.push({ id: uid(), date: newDate, entries, note });
     }
     save(); closeModal(); renderAll();
+    toast(existing ? 'Corte actualizado.' : 'Corte registrado.', 'success');
   };
   const del = document.getElementById('cutDelete');
-  if (del) del.onclick = () => {
-    if (!confirm('¿Eliminar este corte? No se puede deshacer.')) return;
+  if (del) del.onclick = async () => {
+    if (!(await confirmDialog('¿Eliminar este corte? No se puede deshacer.'))) return;
     DB.periods = DB.periods.filter(p => p.id !== periodId);
     save(); closeModal(); renderAll();
+    toast('Corte eliminado.', 'success');
   };
 }

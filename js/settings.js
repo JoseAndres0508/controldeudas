@@ -5,6 +5,8 @@ import { parseNum } from './utils.js';
 import { closeModal, showModal } from './modal.js';
 import { renderAll } from './render-all.js';
 import { connect, disconnect, getFileName, getStatus, readFile, reconnect, supported } from './fileSync.js';
+import { confirmDialog } from './confirmDialog.js';
+import { toast } from './toast.js';
 
 /* =========================================================
    AJUSTES / RESPALDO
@@ -31,8 +33,14 @@ export function openSettings() {
     <h2>Ajustes</h2>
     <div class="grid g2">
       <div><label>Tipo de cambio ₡ por $1</label><input class="num-in" id="sFx" value="${DB.settings.fx || 512}" inputmode="decimal"></div>
+      <div><label>Moneda base de visualización</label>
+        <select id="sBaseCurrency">
+          <option value="CRC" ${DB.settings.baseCurrency !== 'USD' ? 'selected' : ''}>Colones (₡)</option>
+          <option value="USD" ${DB.settings.baseCurrency === 'USD' ? 'selected' : ''}>Dólares ($)</option>
+        </select>
+      </div>
     </div>
-    <p class="muted" style="font-size:13px;margin:12px 0 0">Se usa para convertir las deudas en dólares y poder sumarlas y ordenarlas junto a las de colones.</p>
+    <p class="muted" style="font-size:13px;margin:12px 0 0">El tipo de cambio se usa para convertir las deudas en dólares y sumarlas junto a las de colones. La moneda base define en cuál se muestran los totales generales (Inicio y Reportes).</p>
     <hr style="margin:18px 0">
     <h3 style="margin-bottom:6px">Archivo de datos</h3>
     ${fileSection()}
@@ -46,11 +54,14 @@ export function openSettings() {
   `);
   document.getElementById('sSave').onclick = () => {
     DB.settings.fx = parseNum(document.getElementById('sFx').value) || 512;
+    DB.settings.baseCurrency = document.getElementById('sBaseCurrency').value;
     save(); closeModal(); renderAll();
+    toast('Ajustes guardados.', 'success');
   };
-  document.getElementById('sReset').onclick = () => {
-    if (!confirm('Esto borra todos tus cortes y deudas y vuelve a los datos de ejemplo. ¿Seguro?')) return;
+  document.getElementById('sReset').onclick = async () => {
+    if (!(await confirmDialog('Esto borra todos tus cortes y deudas y vuelve a los datos de ejemplo. ¿Seguro?'))) return;
     setDB(buildSeed()); save(); closeModal(); renderAll();
+    toast('Datos reiniciados a la semilla de ejemplo.', 'success');
   };
   const fConnect = document.getElementById('fConnect');
   if (fConnect) fConnect.onclick = async () => {
@@ -93,7 +104,8 @@ export function importJSON(file) {
       const data = JSON.parse(r.result);
       if (!data.debts || !data.periods) throw new Error('formato');
       setDB(data); save(); renderAll();
-    } catch (e) { alert('Ese archivo no tiene el formato del libro de deudas.'); }
+      toast('Respaldo importado.', 'success');
+    } catch (e) { toast('Ese archivo no tiene el formato del libro de deudas.', 'error'); }
   };
   r.readAsText(file);
 }

@@ -5,7 +5,9 @@ import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
 import { singleDebtProjection } from './estrategia.js';
 import { openCreditor } from './acreedores.js';
-import { debtStatus, dueInfo, openPago, paymentsHistoryHTML, STATUS_LABEL, wirePaymentsHistory } from '../payments.js';
+import { debtStatus, dueInfo, openPago, paymentsHistoryHTML, statusDotHTML, STATUS_LABEL, wirePaymentsHistory } from '../payments.js';
+import { confirmDialog } from '../confirmDialog.js';
+import { toast } from '../toast.js';
 
 /* =========================================================
    PESTAÑA: INGRESAR DEUDAS
@@ -29,7 +31,7 @@ function finEstimadoHTML(d, crc) {
 function dueHTML(d) {
   const info = dueInfo(d);
   if (!info) return '<span class="dim">—</span>';
-  return `<span class="dot ${info.status}" title="${STATUS_LABEL[info.status]}"></span> <span class="num" style="font-size:12px">${fmtDateLong(info.date)}</span>`;
+  return `${statusDotHTML(info)} <span class="num" style="font-size:12px">${fmtDateLong(info.date)}</span>`;
 }
 
 export function renderDeudas() {
@@ -103,8 +105,12 @@ function creditorFieldHTML(d) {
 }
 
 export function openDebt(id, preselectCreditorId) {
-  const d = id ? debtById(id) : { id: null, name: '', creditorId: preselectCreditorId || null, kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false, startDate: null, dueDay: null };
-  if (preselectCreditorId && id) d.creditorId = preselectCreditorId;
+  // Copia de solo lectura para el formulario: nunca se toca DB.debts
+  // directamente acá, solo al hacer clic en "Guardar" (más abajo).
+  const existing = id ? debtById(id) : null;
+  const d = existing
+    ? { ...existing, creditorId: preselectCreditorId || existing.creditorId }
+    : { id: null, name: '', creditorId: preselectCreditorId || null, kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false, startDate: null, dueDay: null };
 
   showModal(`
     <h2>${id ? 'Editar deuda' : 'Nueva deuda'}</h2>
@@ -157,14 +163,16 @@ export function openDebt(id, preselectCreditorId) {
     if (id) Object.assign(debtById(id), obj);
     else DB.debts.push({ id: uid(), ...obj });
     save(); closeModal(); renderAll();
+    toast(id ? 'Deuda actualizada.' : 'Deuda agregada.', 'success');
   };
   const del = document.getElementById('dDelete');
-  if (del) del.onclick = () => {
-    if (!confirm('Esto borra la deuda y su historial en todos los cortes. ¿Seguro? Mejor archivala si ya la pagaste.')) return;
+  if (del) del.onclick = async () => {
+    if (!(await confirmDialog('Esto borra la deuda y su historial en todos los cortes. ¿Seguro? Mejor archivala si ya la pagaste.'))) return;
     DB.debts = DB.debts.filter(x => x.id !== id);
     DB.periods.forEach(p => delete p.entries[id]);
     DB.payments = DB.payments.filter(p => p.debtId !== id);
     save(); closeModal(); renderAll();
+    toast('Deuda eliminada.', 'success');
   };
 }
 
@@ -180,7 +188,7 @@ export function openDebtDetail(id) {
   const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
 
   showModal(`
-    <h2>${d.name}${info ? `<span class="dot ${info.status}" style="margin-left:8px" title="${STATUS_LABEL[info.status]}"></span>` : ''}</h2>
+    <h2>${d.name}${info ? `<span style="margin-left:8px">${statusDotHTML(info)}</span>` : ''}</h2>
     <p class="dim" style="font-size:13px;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind}</p>
     <div class="stat-row">
       <div class="stat"><div class="k">Saldo actual</div><div class="v">${fmtMoney(bal, d.currency)}</div></div>

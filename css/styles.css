@@ -122,6 +122,25 @@ label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;
 .modal h2{margin-bottom:14px}
 .modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--rule-soft)}
 
+/* ---------- toasts ---------- */
+.toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:80;max-width:320px}
+.toast{background:var(--ink);color:var(--paper);font-size:13px;line-height:1.4;padding:10px 14px;border-radius:8px;box-shadow:0 6px 18px rgba(16,20,24,.22);opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast-success{background:var(--up)}
+.toast-error{background:var(--down)}
+
+/* ---------- buscador global ---------- */
+.search-wrap{position:relative;margin:0 14px 10px}
+.search-wrap input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--rule);border-radius:7px;background:var(--card);color:var(--ink)}
+.search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--rule);border-radius:8px;box-shadow:0 10px 24px rgba(16,20,24,.16);max-height:340px;overflow-y:auto;z-index:60;display:none}
+.search-results.open{display:block}
+.search-item{display:block;width:100%;text-align:left;padding:9px 12px;border:none;background:none;cursor:pointer;border-bottom:1px solid var(--rule-soft);font-family:var(--sans);color:var(--ink)}
+.search-item:last-child{border-bottom:none}
+.search-item:hover{background:var(--rule-soft)}
+.search-item .k{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.search-item .v{font-size:13px;margin-top:2px}
+.search-empty{padding:12px;font-size:13px;color:var(--ink-3)}
+
 /* ---------- misc ---------- */
 .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--rule-soft);border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin-bottom:14px}
 .stat{background:var(--card);padding:13px 15px}
