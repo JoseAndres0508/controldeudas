@@ -73,7 +73,7 @@ export function renderReportes() {
         <td class="ta-r num hide-sm">${p ? (p.grew ? `<span style="color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>` : `<span style="color:var(--down)">${fmtMoney(p.paid, d.currency)}</span>`) : '<span class="dim">—</span>'}</td>
         <td>${!p ? '<span class="dim">Cargá el saldo inicial</span>'
           : p.grew ? '<span class="chip vencido">creció</span>'
-          : `<div style="min-width:100px"><div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div><span class="num dim" style="font-size:.6875rem">${p.pct !== null ? p.pct.toFixed(1) + '%' : '—'}</span></div>`}</td>
+          : `<div style="min-width:120px"><div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div><span class="num dim" style="font-size:.6875rem;display:block;margin-top:4px">${p.pct !== null ? p.pct.toFixed(1) + '%' : '—'}</span></div>`}</td>
       </tr>`).join('')}
     </tbody></table>` : `<div class="empty">Todavía no hay deudas activas.</div>`}
   </div>`;

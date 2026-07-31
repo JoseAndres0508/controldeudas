@@ -110,7 +110,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus
 }
 .app-header-in{
   height:100%;display:flex;align-items:center;justify-content:space-between;
-  gap:16px;padding:0 20px;max-width:1400px;margin:0 auto;
+  gap:16px;padding:0 20px;max-width:1760px;margin:0 auto;
 }
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-mark{
@@ -152,7 +152,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus
 }
 
 /* ---------- shell: sidebar + contenido ---------- */
-.shell{display:flex;align-items:flex-start;flex:1;width:100%;max-width:1400px;margin:0 auto}
+.shell{display:flex;align-items:flex-start;flex:1;width:100%;max-width:1760px;margin:0 auto}
 .sidebar{
   width:216px;flex-shrink:0;background:var(--card);border-right:1px solid var(--rule);
   display:flex;flex-direction:column;padding:16px 0;
@@ -206,11 +206,18 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus
 .card{background:var(--card);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;margin-bottom:14px}
 .card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse;font-size:.875rem}
-th{text-align:left;font-family:var(--mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:0 10px 8px 0;border-bottom:1px solid var(--rule)}
-td{padding:10px 10px 10px 0;border-bottom:1px solid var(--rule-soft);vertical-align:middle;overflow-wrap:anywhere}
+th{text-align:left;font-family:var(--mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:500;padding:0 14px 8px;border-bottom:1px solid var(--rule)}
+td{padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:middle}
+/* Padding simétrico en todas las celdas para que las columnas respiren;
+   sólo los extremos se pegan al borde de la tarjeta. Ojo: NO poner
+   padding-right:0 a las columnas .ta-r, porque cuando una de ellas no es
+   la última su contenido queda pegado al de la siguiente. */
+th:first-child,td:first-child{padding-left:0}
+th:last-child,td:last-child{padding-right:0}
 tr:last-child td{border-bottom:0}
 .ta-r{text-align:right}
-th.ta-r,td.ta-r{padding-right:0}
+/* Los importes no se parten en dos líneas. */
+td.num,td .num{white-space:nowrap}
 .chip{font-family:var(--mono);font-size:.625rem;padding:2px 6px;border-radius:4px;background:var(--paper);color:var(--ink-2);letter-spacing:.04em;white-space:nowrap;display:inline-block}
 .chip.warn{background:var(--focus-bg);color:var(--focus)}
 .chip.aldia{background:var(--down-bg);color:var(--down)}
@@ -314,7 +321,7 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
 /* ---------- footer ---------- */
 .app-footer{flex-shrink:0;background:var(--card);border-top:1px solid var(--rule);padding:20px 0}
 .app-footer-in{
-  max-width:1400px;margin:0 auto;padding:0 24px;
+  max-width:1760px;margin:0 auto;padding:0 24px;
   display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
 }
 .app-footer p{margin:0;font-size:.8125rem;color:var(--ink-2)}
@@ -366,6 +373,8 @@ label{display:block;font-family:var(--mono);font-size:.625rem;letter-spacing:.09
   .snap-row{grid-template-columns:1fr 1fr;gap:8px}
   .snap-name{grid-column:1/-1;padding-bottom:0}
   td,th{font-size:.8125rem}
+  th{padding:0 8px 8px}
+  td{padding:10px 8px}
   .hide-sm{display:none}
   .chart-box{height:230px}
   .modal{padding:16px 16px 18px}

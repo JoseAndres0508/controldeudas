@@ -42,9 +42,9 @@ function progressCellHTML(d) {
   const p = debtProgress(d);
   if (!p) return '<span class="chip warn">falta inicial</span>';
   if (p.grew) return `<span class="num" style="font-size:.75rem;color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>`;
-  return `<div style="min-width:88px">
+  return `<div style="min-width:110px">
     <div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div>
-    <span class="num dim" style="font-size:.6875rem">${p.pct !== null ? p.pct.toFixed(0) + '%' : '—'}</span>
+    <span class="num dim" style="font-size:.6875rem;display:block;margin-top:4px">${p.pct !== null ? p.pct.toFixed(0) + '%' : '—'}</span>
   </div>`;
 }
 
