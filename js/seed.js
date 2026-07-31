@@ -29,7 +29,9 @@ export const SEED_DEBTS = [
 export function buildSeed() {
   const debts = SEED_DEBTS.map(d => ({
     id: uid(), name: d.name, issuer: d.issuer, kind: d.kind, currency: d.currency,
-    rate: d.rate, minPayment: d.minPayment, notes: '', archived: false, startDate: null, dueDay: null
+    rate: d.rate, minPayment: d.minPayment, notes: '', archived: false, startDate: null, dueDay: null,
+    // Primer saldo conocido del histórico; editable desde el formulario.
+    initialBalance: d.hist.find(v => v !== null && v !== undefined) ?? null
   }));
   const periods = SEED_DATES.map((date, i) => {
     const entries = {};

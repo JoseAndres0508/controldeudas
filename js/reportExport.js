@@ -1,5 +1,5 @@
 import { DB } from './state.js';
-import { activeDebts, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
+import { activeDebts, creditorName, debtById, debtProgress, fmtCRC, fmtDateLong, fmtMoney, lastBalance, overallProgress, periodTotalCRC, sortedPeriods, toCRC } from './utils.js';
 import { debtStatus, movementLabel, totalPaidCRC } from './payments.js';
 import { toast } from './toast.js';
 
@@ -19,7 +19,10 @@ export function exportExcel() {
     Moneda: d.currency,
     'Tasa anual %': d.rate ?? '',
     'Cuota mínima': d.minPayment ?? '',
+    'Saldo inicial': d.initialBalance ?? '',
     'Saldo actual': lastBalance(d.id),
+    'Pagado': d.initialBalance != null ? Math.max(0, d.initialBalance - lastBalance(d.id)) : '',
+    'Avance %': (() => { const p = debtProgress(d); return p && p.pct !== null ? Number(p.pct.toFixed(1)) : ''; })(),
     Estado: debtStatus(d, toCRC(lastBalance(d.id), d.currency)),
     Archivada: d.archived ? 'Sí' : 'No'
   }));
@@ -55,11 +58,23 @@ export function exportPDF() {
   doc.setFontSize(12);
   doc.text(`Total adeudado: ${fmtCRC(totalDebt)}`, 14, 34);
   doc.text(`Total pagado (histórico): ${fmtCRC(totalPaid)}`, 14, 41);
+  const overall = overallProgress();
+  if (overall) doc.text(`Avance: ${fmtCRC(overall.paid)} de ${fmtCRC(overall.initial)}${overall.pct !== null ? ` (${overall.pct.toFixed(1)}%)` : ''}`, 14, 48);
 
   doc.autoTable({
-    startY: 50,
-    head: [['Deuda', 'Acreedor', 'Estado', 'Saldo']],
-    body: activeDebts().map(d => [d.name, creditorName(d) || '—', debtStatus(d, toCRC(lastBalance(d.id), d.currency)), fmtMoney(lastBalance(d.id), d.currency)])
+    startY: overall ? 57 : 50,
+    head: [['Deuda', 'Acreedor', 'Estado', 'Saldo inicial', 'Saldo actual', 'Avance']],
+    body: activeDebts().map(d => {
+      const p = debtProgress(d);
+      return [
+        d.name,
+        creditorName(d) || '—',
+        debtStatus(d, toCRC(lastBalance(d.id), d.currency)),
+        p ? fmtMoney(p.initial, d.currency) : '—',
+        fmtMoney(lastBalance(d.id), d.currency),
+        !p ? '—' : p.grew ? `+${fmtMoney(p.grown, d.currency)}` : p.pct !== null ? `${p.pct.toFixed(1)}%` : '—'
+      ];
+    })
   });
 
   doc.save(`libro-deudas-${new Date().toISOString().slice(0, 10)}.pdf`);

@@ -1,5 +1,5 @@
 import { DB } from '../state.js';
-import { activeDebts, creditorName, debtById, debtsByCreditor, fmtBase, fmtCRC, fmtDateLong, lastBalance, toCRC } from '../utils.js';
+import { activeDebts, creditorName, debtById, debtProgress, debtsByCreditor, fmtBase, fmtCRC, fmtDateLong, fmtMoney, lastBalance, overallProgress, toCRC } from '../utils.js';
 import { dueInfo, movementAmountHTML, movementLabel, statusDotHTML, totalChargedCRC, totalPaidCRC } from '../payments.js';
 import { exportExcel, exportPDF } from '../reportExport.js';
 
@@ -45,6 +45,37 @@ export function renderReportes() {
     <div class="stat"><div class="k">Total pagado (histórico)</div><div class="v">${fmtBase(totalPaid)}</div></div>
     ${totalCharged > 0 ? `<div class="stat"><div class="k">Total consumido</div><div class="v">${fmtBase(totalCharged)}</div></div>` : ''}
     <div class="stat"><div class="k">Deudas vencidas</div><div class="v">${vencidas.length}</div></div>
+  </div>`;
+
+  const overall = overallProgress();
+  if (overall) {
+    html += `<div class="card">
+      <div class="card-head">
+        <h2>Avance general</h2>
+        <span class="num" style="font-size:13px">${overall.pct !== null ? overall.pct.toFixed(1) + '%' : ''}</span>
+      </div>
+      <div class="mini-track" style="height:8px"><div class="mini-fill f-down" style="width:${overall.pct ?? 0}%"></div></div>
+      <p class="dim" style="font-size:13px;margin:8px 0 0">Arrancaste con <strong>${fmtBase(overall.initial)}</strong> y hoy debés <strong>${fmtBase(overall.current)}</strong>: llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados sobre ${overall.count} deuda${overall.count === 1 ? '' : 's'}.</p>
+    </div>`;
+  }
+
+  const progRows = activeDebts()
+    .map(d => ({ d, p: debtProgress(d) }))
+    .sort((a, b) => (b.p?.pct ?? -1) - (a.p?.pct ?? -1));
+
+  html += `<div class="card">
+    <div class="card-head"><h2>Avance por deuda</h2></div>
+    ${progRows.length ? `<table><thead><tr><th>Deuda</th><th class="ta-r hide-sm">Saldo inicial</th><th class="ta-r">Saldo actual</th><th class="ta-r hide-sm">Pagado</th><th>Avance</th></tr></thead><tbody>
+      ${progRows.map(({ d, p }) => `<tr>
+        <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
+        <td class="ta-r num hide-sm">${p ? fmtMoney(p.initial, d.currency) : '<span class="chip warn">falta</span>'}</td>
+        <td class="ta-r num">${fmtMoney(lastBalance(d.id), d.currency)}</td>
+        <td class="ta-r num hide-sm">${p ? (p.grew ? `<span style="color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>` : `<span style="color:var(--down)">${fmtMoney(p.paid, d.currency)}</span>`) : '<span class="dim">—</span>'}</td>
+        <td>${!p ? '<span class="dim">Cargá el saldo inicial</span>'
+          : p.grew ? '<span class="chip vencido">creció</span>'
+          : `<div style="min-width:100px"><div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div><span class="num dim" style="font-size:11px">${p.pct !== null ? p.pct.toFixed(1) + '%' : '—'}</span></div>`}</td>
+      </tr>`).join('')}
+    </tbody></table>` : `<div class="empty">Todavía no hay deudas activas.</div>`}
   </div>`;
 
   html += `<div class="card">

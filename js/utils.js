@@ -57,6 +57,34 @@ export function lastBalance(debtId) {
   return Math.max(0, base + delta);
 }
 
+/** Avance de una deuda contra su saldo inicial.
+ *
+ *  Devuelve null si no hay saldo inicial cargado. Si el inicial es 0 (una
+ *  tarjeta que te dieron en cero) no hay porcentaje que calcular: solo se
+ *  reporta cuánto creció. `grew` marca las deudas que hoy deben más que al
+ *  inicio, para no mostrar porcentajes negativos. */
+export function debtProgress(d) {
+  const initial = d.initialBalance;
+  if (initial === null || initial === undefined) return null;
+  const current = lastBalance(d.id);
+  const diff = initial - current;          // positivo = bajó
+  const grew = diff < 0;
+  const pct = initial > 0 ? Math.max(0, Math.min(100, (diff / initial) * 100)) : null;
+  return { initial, current, paid: Math.max(0, diff), grown: Math.max(0, -diff), grew, pct, done: current <= 0 };
+}
+
+/** Avance agregado de todas las deudas activas con saldo inicial, en colones. */
+export function overallProgress() {
+  const rows = activeDebts()
+    .map(d => ({ d, p: debtProgress(d) }))
+    .filter(x => x.p);
+  if (!rows.length) return null;
+  const initial = rows.reduce((s, { d, p }) => s + toCRC(p.initial, d.currency), 0);
+  const current = rows.reduce((s, { d, p }) => s + toCRC(p.current, d.currency), 0);
+  const pct = initial > 0 ? Math.max(0, Math.min(100, ((initial - current) / initial) * 100)) : null;
+  return { initial, current, paid: Math.max(0, initial - current), pct, count: rows.length };
+}
+
 /** Total en colones de un periodo (convierte USD). */
 export function periodTotalCRC(period) {
   let t = 0;

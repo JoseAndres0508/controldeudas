@@ -20,6 +20,7 @@ function migrate() {
   if (!DB.settings.baseCurrency) DB.settings.baseCurrency = 'CRC';
   // Antes todos los registros eran abonos; ahora hay consumos y ajustes.
   DB.payments.forEach(p => { if (!p.type) p.type = 'pago'; });
+  const ordered = [...DB.periods].sort((a, b) => a.date.localeCompare(b.date));
   DB.debts.forEach(d => {
     if (!d.creditorId && d.issuer && d.issuer.trim()) {
       const name = d.issuer.trim();
@@ -28,6 +29,18 @@ function migrate() {
       d.creditorId = c.id;
     }
     if (d.creditorId === undefined) d.creditorId = null;
+
+    // Saldo inicial: si no está, se rellena con el primer saldo que aparezca
+    // en los cortes. Es una estimación editable — el usuario puede corregirla
+    // en el formulario de la deuda.
+    if (d.initialBalance === undefined || d.initialBalance === null) {
+      let first = null;
+      for (const p of ordered) {
+        const e = p.entries[d.id];
+        if (e && e.balance !== null && e.balance !== undefined) { first = e.balance; break; }
+      }
+      d.initialBalance = first;
+    }
   });
 }
 migrate();

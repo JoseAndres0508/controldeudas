@@ -1,5 +1,5 @@
 import { DB } from '../state.js';
-import { activeDebts, debtById, debtReductions, fmtCRC, fmtDateLong, lastBalance, toCRC } from '../utils.js';
+import { activeDebts, debtById, debtReductions, fmtBase, fmtCRC, fmtDateLong, lastBalance, overallProgress, toCRC } from '../utils.js';
 import { heroHTML, tapeHTML } from '../header.js';
 import { simulate, strategySectionHTML, wireStrategySection } from './estrategia.js';
 import { chartsSectionHTML, drawCharts } from './historial.js';
@@ -37,10 +37,20 @@ export function renderInicio() {
     <button class="btn" data-quickconsumo>Registrar consumo</button>
   </div>`;
 
+  const overall = overallProgress();
   html += `<div class="stat-row">
     <div class="stat"><div class="k">Libre en</div><div class="v">${sim && sim.reached ? sim.months + ' meses' : '—'}</div></div>
+    <div class="stat"><div class="k">Avance total</div><div class="v">${overall && overall.pct !== null ? overall.pct.toFixed(1) + '%' : '—'}</div></div>
     <div class="stat"><div class="k">La que más bajó</div><div class="v" style="font-size:15px">${best ? best.d.name : '—'}</div></div>
   </div>`;
+
+  if (overall && overall.pct !== null) {
+    html += `<div class="card">
+      <div class="card-head"><h2>Avance desde el inicio</h2><span class="num" style="font-size:13px">${overall.pct.toFixed(1)}%</span></div>
+      <div class="mini-track" style="height:8px"><div class="mini-fill f-down" style="width:${overall.pct}%"></div></div>
+      <p class="dim" style="font-size:13px;margin:8px 0 0">De <strong>${fmtBase(overall.initial)}</strong> iniciales llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados. Quedan ${fmtBase(overall.current)}.</p>
+    </div>`;
+  }
 
   const dues = activeDebts()
     .map(d => ({ d, info: dueInfo(d) }))
