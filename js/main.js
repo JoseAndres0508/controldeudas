@@ -3,7 +3,7 @@ import { renderAll } from './render-all.js';
 import { initModal } from './modal.js';
 import { initNav, showTab } from './nav.js';
 import { openCut } from './tabs/cortes.js';
-import { openDebt } from './tabs/deudas.js';
+import { openDebt, openDebtDetail } from './tabs/deudas.js';
 import { renderInicio } from './tabs/inicio.js';
 import { openCreditor } from './tabs/acreedores.js';
 import { openPago } from './payments.js';
@@ -19,7 +19,7 @@ initModal();
 initNav();
 
 document.body.addEventListener('click', e => {
-  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar]');
+  const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-verdebt]');
   if (!t) return;
   if (t.hasAttribute('data-newcut')) openCut(t.dataset.newcut || null, null);
   else if (t.hasAttribute('data-editcut')) openCut(null, t.dataset.editcut);
@@ -28,6 +28,7 @@ document.body.addEventListener('click', e => {
   else if (t.hasAttribute('data-goto')) showTab(t.dataset.goto);
   else if (t.hasAttribute('data-editcreditor')) openCreditor(t.dataset.editcreditor);
   else if (t.hasAttribute('data-pagar')) openPago(t.dataset.pagar, () => renderAll());
+  else if (t.hasAttribute('data-verdebt')) openDebtDetail(t.dataset.verdebt);
 });
 document.body.addEventListener('click', e => {
   if (e.target.id === 'btnNewDebt') openDebt(null);

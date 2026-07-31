@@ -1,15 +1,24 @@
 import { DB, save } from '../state.js';
-import { activeDebts, addMonthsISO, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
+import { activeDebts, addMonthsISO, creditorById, creditorName, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
 import { singleDebtProjection } from './estrategia.js';
 import { openCreditor } from './acreedores.js';
-import { dueInfo, paymentsHistoryHTML, STATUS_LABEL, wirePaymentsHistory } from '../payments.js';
+import { debtStatus, dueInfo, openPago, paymentsHistoryHTML, STATUS_LABEL, wirePaymentsHistory } from '../payments.js';
 
 /* =========================================================
    PESTAÑA: INGRESAR DEUDAS
    ========================================================= */
+const FILTERS = [
+  { key: 'activa', label: 'Activas' },
+  { key: 'vencida', label: 'Vencidas' },
+  { key: 'pagada', label: 'Pagadas' },
+  { key: 'todas', label: 'Todas' }
+];
+let searchText = '';
+let statusFilter = 'activa';
+
 function finEstimadoHTML(d, crc) {
   const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
   if (!proj) return '<span class="chip warn">falta dato</span>';
@@ -35,33 +44,50 @@ export function renderDeudas() {
       <h2>Ingresar deudas</h2>
       <button class="btn primary" id="btnNewDebt">Agregar deuda</button>
     </div>
-    <table><thead><tr>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+      <input id="debtSearch" placeholder="Buscar deuda…" value="${searchText}" style="max-width:220px">
+      <div class="seg">
+        ${FILTERS.map(f => `<button data-filter="${f.key}" aria-pressed="${statusFilter === f.key}">${f.label}</button>`).join('')}
+      </div>
+    </div>`;
+
+  const rows = DB.debts
+    .map(d => ({ d, crc: toCRC(lastBalance(d.id), d.currency) }))
+    .filter(({ d }) => d.name.toLowerCase().includes(searchText.trim().toLowerCase()))
+    .filter(({ d, crc }) => statusFilter === 'todas' || debtStatus(d, crc) === statusFilter)
+    .sort((a, b) => b.crc - a.crc);
+
+  if (!rows.length) {
+    html += `<div class="empty">Ninguna deuda coincide con la búsqueda o el filtro.</div>`;
+  } else {
+    html += `<table><thead><tr>
       <th></th><th>Deuda</th><th class="hide-sm">Tipo</th><th class="ta-r">Tasa anual</th><th class="ta-r hide-sm">Cuota mínima</th><th class="ta-r">Saldo actual</th><th class="hide-sm">Vencimiento</th><th class="ta-r hide-sm">Fin estimado</th><th class="ta-r"></th>
     </tr></thead><tbody>`;
-
-  const rows = activeDebts().map(d => ({ d, crc: toCRC(lastBalance(d.id), d.currency) })).sort((a, b) => b.crc - a.crc);
-  rows.forEach(({ d, crc }) => {
-    const bal = lastBalance(d.id);
-    html += `<tr>
-      <td><span class="chip">${d.currency}</span></td>
-      <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
-      <td class="hide-sm"><span class="chip">${d.kind}</span></td>
-      <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
-      <td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>
-      <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
-      <td class="hide-sm">${dueHTML(d)}</td>
-      <td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>
-      <td class="ta-r"><div class="btn-row" style="justify-content:flex-end"><button class="btn ghost" data-pagar="${d.id}">Pagar</button><button class="btn ghost" data-editdebt="${d.id}">Editar</button></div></td>
-    </tr>`;
-  });
-  html += `</tbody></table></div>`;
-
-  const arch = DB.debts.filter(d => d.archived);
-  if (arch.length) {
-    html += `<div class="card"><h3 style="margin-bottom:10px">Archivadas</h3>` +
-      arch.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0"><span class="muted">${d.name}</span><button class="btn ghost" data-editdebt="${d.id}">Editar</button></div>`).join('') + `</div>`;
+    rows.forEach(({ d, crc }) => {
+      const bal = lastBalance(d.id);
+      const st = debtStatus(d, crc);
+      html += `<tr${st === 'pagada' ? ' style="opacity:.6"' : ''}>
+        <td><span class="chip">${d.currency}</span></td>
+        <td><strong style="font-weight:500">${d.name}</strong>${st === 'pagada' ? ' <span class="chip">pagada</span>' : ''}<br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
+        <td class="hide-sm"><span class="chip">${d.kind}</span></td>
+        <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
+        <td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>
+        <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
+        <td class="hide-sm">${dueHTML(d)}</td>
+        <td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>
+        <td class="ta-r"><div class="btn-row" style="justify-content:flex-end"><button class="btn ghost" data-verdebt="${d.id}">Ver</button><button class="btn ghost" data-pagar="${d.id}">Pagar</button><button class="btn ghost" data-editdebt="${d.id}">Editar</button></div></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
   }
+  html += `</div>`;
   el.innerHTML = html;
+
+  const search = document.getElementById('debtSearch');
+  search.oninput = () => { searchText = search.value; renderDeudas(); search.focus(); search.setSelectionRange(search.value.length, search.value.length); };
+  document.querySelectorAll('#tab-deudas [data-filter]').forEach(btn => {
+    btn.onclick = () => { statusFilter = btn.dataset.filter; renderDeudas(); };
+  });
 }
 
 function creditorFieldHTML(d) {
@@ -140,4 +166,44 @@ export function openDebt(id, preselectCreditorId) {
     DB.payments = DB.payments.filter(p => p.debtId !== id);
     save(); closeModal(); renderAll();
   };
+}
+
+/** Vista de solo lectura con todo lo relevante de una deuda: acreedor,
+ *  proyección de pago e historial de abonos. */
+export function openDebtDetail(id) {
+  const d = debtById(id);
+  if (!d) return;
+  const bal = lastBalance(d.id);
+  const crc = toCRC(bal, d.currency);
+  const c = creditorById(d.creditorId);
+  const info = dueInfo(d);
+  const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
+
+  showModal(`
+    <h2>${d.name}${info ? `<span class="dot ${info.status}" style="margin-left:8px" title="${STATUS_LABEL[info.status]}"></span>` : ''}</h2>
+    <p class="dim" style="font-size:13px;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind}</p>
+    <div class="stat-row">
+      <div class="stat"><div class="k">Saldo actual</div><div class="v">${fmtMoney(bal, d.currency)}</div></div>
+      <div class="stat"><div class="k">Tasa anual</div><div class="v">${d.rate != null ? d.rate.toFixed(2) + '%' : '—'}</div></div>
+      <div class="stat"><div class="k">Cuota mínima</div><div class="v" style="font-size:15px">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '—'}</div></div>
+      <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:15px">${proj && proj.reached ? fmtDateLong(addMonthsISO(proj.months)) : '—'}</div></div>
+    </div>
+    ${c ? `<div class="card">
+      <div class="card-head"><h3>Acreedor</h3></div>
+      <p style="margin:0;font-size:14px"><strong style="font-weight:500">${c.name}</strong></p>
+      ${c.phone ? `<p class="dim" style="font-size:13px;margin:4px 0 0">${c.phone}</p>` : ''}
+      ${c.email ? `<p class="dim" style="font-size:13px;margin:2px 0 0">${c.email}</p>` : ''}
+      ${!c.phone && !c.email ? `<p class="dim" style="font-size:13px;margin:4px 0 0">Sin datos de contacto — completalos en Acreedores.</p>` : ''}
+    </div>` : ''}
+    <h3 style="margin-bottom:4px">Historial de pagos</h3>
+    ${paymentsHistoryHTML(id)}
+    <div class="modal-foot">
+      <button class="btn" data-close>Cerrar</button>
+      <button class="btn" id="vdPagar">Registrar pago</button>
+      <button class="btn primary" id="vdEditar">Editar</button>
+    </div>
+  `);
+  wirePaymentsHistory(() => openDebtDetail(id));
+  document.getElementById('vdEditar').onclick = () => openDebt(id);
+  document.getElementById('vdPagar').onclick = () => openPago(id, () => openDebtDetail(id));
 }

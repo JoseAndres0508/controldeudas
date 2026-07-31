@@ -48,6 +48,15 @@ export function dueInfo(d) {
   return { status, date: due.toISOString().slice(0, 10) };
 }
 
+/** Estado general de una deuda para el filtro de "Ingresar deudas":
+ *  pagada (archivada o saldo en cero), vencida (pago atrasado) o activa. */
+export function debtStatus(d, crcBalance) {
+  if (d.archived || (crcBalance !== undefined && crcBalance <= 0)) return 'pagada';
+  const info = dueInfo(d);
+  if (info && info.status === 'vencido') return 'vencida';
+  return 'activa';
+}
+
 export function registerPayment({ debtId, date, amount, note }) {
   DB.payments.push({ id: uid(), debtId, date, amount, note: note || '' });
   save();
