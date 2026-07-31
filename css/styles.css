@@ -76,8 +76,17 @@ th.ta-r{padding-right:0}
 td.ta-r{padding-right:0}
 .chip{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;background:var(--paper);color:var(--ink-2);letter-spacing:.04em;white-space:nowrap}
 .chip.warn{background:var(--focus-bg);color:var(--focus)}
+.chip.aldia{background:var(--down-bg);color:var(--down)}
+.chip.proximo{background:var(--focus-bg);color:var(--focus)}
+.chip.vencido{background:var(--up-bg);color:var(--up)}
 .rank{font-family:var(--mono);font-size:11px;color:var(--ink-3);width:22px}
 .rank.first{color:var(--focus);font-weight:600}
+
+/* ---------- semáforo de vencimiento ---------- */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot.aldia{background:var(--down)}
+.dot.proximo{background:var(--focus)}
+.dot.vencido{background:var(--up)}
 
 /* ---------- controls ---------- */
 button.btn{font-family:var(--sans);font-size:13px;background:var(--card);border:1px solid var(--rule);color:var(--ink);padding:7px 13px;border-radius:var(--r);cursor:pointer}

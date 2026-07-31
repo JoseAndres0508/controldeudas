@@ -3,6 +3,7 @@ import { activeDebts, debtReductions, fmtCRC, fmtDateLong, lastBalance, toCRC } 
 import { heroHTML, tapeHTML } from '../header.js';
 import { simulate, strategySectionHTML, wireStrategySection } from './estrategia.js';
 import { chartsSectionHTML, drawCharts } from './historial.js';
+import { dueInfo, STATUS_LABEL } from '../payments.js';
 
 /* =========================================================
    PESTAÑA: INICIO
@@ -35,16 +36,33 @@ export function renderInicio() {
     <div class="stat"><div class="k">La que más bajó</div><div class="v" style="font-size:15px">${best ? best.d.name : '—'}</div></div>
   </div>`;
 
+  const dues = activeDebts()
+    .map(d => ({ d, info: dueInfo(d) }))
+    .filter(x => x.info && (x.info.status === 'vencido' || x.info.status === 'proximo'))
+    .sort((a, b) => (a.info.status === b.info.status ? a.info.date.localeCompare(b.info.date) : a.info.status === 'vencido' ? -1 : 1));
+
+  if (dues.length) {
+    html += `<div class="card">
+      <div class="card-head"><h2>Pagos próximos y vencidos</h2></div>
+      ${dues.map(({ d, info }) => `<div class="mini-row">
+          <span class="dot ${info.status}" title="${STATUS_LABEL[info.status]}"></span>
+          <div class="mini-main"><p class="mini-name">${d.name}</p><span class="dim" style="font-size:12px">${STATUS_LABEL[info.status]} · ${fmtDateLong(info.date)}</span></div>
+          <button class="btn ghost" data-pagar="${d.id}">Pagar</button>
+        </div>`).join('')}
+    </div>`;
+  }
+
   html += `<div class="card">
     <div class="card-head"><h2>Deudas más altas</h2></div>
-    ${top.length ? top.map((x, i) => `<div class="mini-row">
+    ${top.length ? top.map((x, i) => { const info = dueInfo(x.d); return `<div class="mini-row">
         <span class="rank ${i === 0 ? 'first' : ''}">${String(i + 1).padStart(2, '0')}</span>
+        ${info ? `<span class="dot ${info.status}" title="${STATUS_LABEL[info.status]}"></span>` : ''}
         <div class="mini-main">
           <p class="mini-name">${x.d.name}</p>
           <div class="mini-track"><div class="mini-fill ${i === 0 ? 'f-first' : ''}" style="width:${Math.round((x.crc / maxCRC) * 100)}%"></div></div>
         </div>
         <span class="mini-val num">${fmtCRC(x.crc)}</span>
-      </div>`).join('') : `<div class="empty">Todavía no hay deudas activas con saldo.</div>`}
+      </div>`; }).join('') : `<div class="empty">Todavía no hay deudas activas con saldo.</div>`}
   </div>`;
 
   html += `<div class="card">

@@ -12,6 +12,42 @@ import { closeModal, showModal } from './modal.js';
 export const paymentsForDebt = debtId =>
   DB.payments.filter(p => p.debtId === debtId).sort((a, b) => b.date.localeCompare(a.date));
 
+/* =========================================================
+   VENCIMIENTOS
+   A partir del "día de pago" (dueDay) de cada deuda, calcula
+   si está al día, próxima a vencer o vencida.
+   ========================================================= */
+const WARN_DAYS = 5;
+export const STATUS_LABEL = { aldia: 'Al día', proximo: 'Próximo a vencer', vencido: 'Vencido' };
+
+function dueDateInMonth(dueDay, ref) {
+  const y = ref.getFullYear(), m = ref.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  return new Date(y, m, Math.min(dueDay, daysInMonth));
+}
+
+/** Devuelve {status, date} según el día de pago configurado, o null si no hay dato. */
+export function dueInfo(d) {
+  if (!d.dueDay) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  let due = dueDateInMonth(d.dueDay, today);
+  let status;
+  if (due < today) {
+    const dueISO = due.toISOString().slice(0, 10);
+    const paid = paymentsForDebt(d.id).some(p => p.date >= dueISO);
+    if (!paid) {
+      status = 'vencido';
+    } else {
+      const next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+      due = dueDateInMonth(d.dueDay, next);
+      status = Math.round((due - today) / 86400000) <= WARN_DAYS ? 'proximo' : 'aldia';
+    }
+  } else {
+    status = Math.round((due - today) / 86400000) <= WARN_DAYS ? 'proximo' : 'aldia';
+  }
+  return { status, date: due.toISOString().slice(0, 10) };
+}
+
 export function registerPayment({ debtId, date, amount, note }) {
   DB.payments.push({ id: uid(), debtId, date, amount, note: note || '' });
   save();
