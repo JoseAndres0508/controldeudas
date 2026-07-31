@@ -1,5 +1,6 @@
 import { Store } from './store.js';
 import { buildSeed } from './seed.js';
+import { writeFile } from './fileSync.js';
 
 /* =========================================================
    ESTADO GLOBAL (DB)
@@ -9,7 +10,12 @@ import { buildSeed } from './seed.js';
    ========================================================= */
 export let DB = Store.load() || buildSeed();
 
-export function save() { Store.save(DB); }
+/** Guarda en localStorage (caché rápida) y, si hay un archivo
+ *  conectado, también ahí (fuente de verdad entre sesiones). */
+export function save() {
+  Store.save(DB);
+  writeFile(DB);
+}
 
 /** Reemplaza la base de datos completa (usado por reset e import). */
 export function setDB(data) { DB = data; }

@@ -1,4 +1,4 @@
-import { DB, save } from './state.js';
+import { DB, save, setDB } from './state.js';
 import { renderAll } from './render-all.js';
 import { initModal } from './modal.js';
 import { initNav, showTab } from './nav.js';
@@ -6,6 +6,7 @@ import { openCut } from './tabs/cortes.js';
 import { openDebt } from './tabs/deudas.js';
 import { renderEstrategia } from './tabs/estrategia.js';
 import { exportJSON, importJSON, openSettings } from './settings.js';
+import { getStatus, readFile, tryRestore } from './fileSync.js';
 
 /* =========================================================
    PUNTO DE ARRANQUE
@@ -31,4 +32,15 @@ document.getElementById('btnImport').onclick = () => document.getElementById('fi
 document.getElementById('fileImport').onchange = e => { if (e.target.files[0]) importJSON(e.target.files[0]); };
 document.getElementById('btnSettings').onclick = openSettings;
 
-renderAll();
+/** Al arrancar: si hay un archivo conectado y con permiso vigente,
+ *  lo lee y lo toma como fuente de verdad antes del primer render. */
+async function boot() {
+  await tryRestore();
+  if (getStatus() === 'connected') {
+    const data = await readFile();
+    if (data && data.debts && data.periods) setDB(data);
+    save();
+  }
+  renderAll();
+}
+boot();

@@ -1,9 +1,10 @@
-import { DB, save } from '../state.js';
+import { DB, save, setDB } from '../state.js';
 import { activeDebts, fmtCRC, fmtDateLong, fmtMoney, fmtSigned, lastBalance, parseNum, pendingCutDate, series } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { Store } from '../store.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
+import { getFileName, getStatus, readFile, reconnect } from '../fileSync.js';
 
 /* =========================================================
    PESTAÑA: CORTES
@@ -16,6 +17,9 @@ export function renderCortes() {
 
   if (!Store.persistent) {
     html += `<div class="banner">Este navegador bloqueó el almacenamiento local, así que los cambios viven solo en esta pestaña. Al publicarlo en GitHub Pages sí se guardan. Usá <strong>Exportar respaldo</strong> antes de cerrar.</div>`;
+  }
+  if (getStatus() === 'needs-permission') {
+    html += `<div class="banner due"><span>Reconectá el archivo <strong>${getFileName()}</strong> para traer la última versión guardada.</span><button class="btn primary" id="btnReconnectFile">Reconectar archivo</button></div>`;
   }
   if (pending) {
     html += `<div class="banner due"><span>Falta registrar el corte del <strong>${fmtDateLong(pending)}</strong>.</span><button class="btn primary" data-newcut="${pending}">Registrar corte</button></div>`;
@@ -53,6 +57,16 @@ export function renderCortes() {
   }
   html += `</div>`;
   el.innerHTML = html;
+
+  const btnRe = document.getElementById('btnReconnectFile');
+  if (btnRe) btnRe.onclick = async () => {
+    const ok = await reconnect();
+    if (ok) {
+      const data = await readFile();
+      if (data && data.debts && data.periods) { setDB(data); save(); }
+    }
+    renderAll();
+  };
 }
 
 /* ---- modal de corte ---- */
