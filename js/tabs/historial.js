@@ -1,21 +1,24 @@
 import { fmtCRC, fmtDate, series } from '../utils.js';
 
 /* =========================================================
-   PESTAÑA: HISTORIAL (gráficos con Chart.js, cargado global
-   vía <script> UMD en index.html)
+   GRÁFICOS (Chart.js, cargado global vía <script> UMD en index.html)
+   Ya no es una pestaña propia: su fragmento de HTML y su dibujo
+   se insertan dentro de la pestaña "Inicio" (js/tabs/inicio.js).
    ========================================================= */
 let chart1, chart2;
 
-export function renderHistorial() {
-  const el = document.getElementById('tab-historial');
-  const s = series();
-  el.innerHTML = `
+export function chartsSectionHTML() {
+  return `
     <div class="card"><h3 style="margin-bottom:12px">Deuda total en colones</h3>
       <div class="chart-box"><canvas id="c1" role="img" aria-label="Línea de la deuda total en colones por fecha de corte">Deuda total por corte.</canvas></div></div>
     <div class="card"><h3 style="margin-bottom:4px">Movimiento por corte</h3>
       <p class="dim" style="font-size:13px;margin:0 0 12px">Barra hacia arriba = la deuda bajó. Hacia abajo = creció.</p>
       <div class="chart-box"><canvas id="c2" role="img" aria-label="Barras del cambio de deuda por corte">Cambio de deuda por corte.</canvas></div></div>`;
+}
 
+/** Dibuja los gráficos; llamar después de insertar chartsSectionHTML() en el DOM. */
+export function drawCharts() {
+  const s = series();
   if (!window.Chart || !s.length) return;
   const labels = s.map(x => fmtDate(x.date));
   const axis = { grid: { color: '#DEE2DB' }, ticks: { color: '#8A918A', font: { size: 10, family: 'IBM Plex Mono' } } };

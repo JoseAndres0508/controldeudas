@@ -1,12 +1,12 @@
-import { renderHistorial } from './tabs/historial.js';
+import { renderInicio } from './tabs/inicio.js';
 
 /* =========================================================
    NAVEGACIÓN ENTRE PESTAÑAS
    ========================================================= */
 export function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
-  ['cortes', 'deudas', 'estrategia', 'historial'].forEach(t => document.getElementById('tab-' + t).hidden = (t !== name));
-  if (name === 'historial') renderHistorial();
+  ['inicio', 'deudas', 'cortes'].forEach(t => document.getElementById('tab-' + t).hidden = (t !== name));
+  if (name === 'inicio') renderInicio();
 }
 
 export function initNav() {

@@ -1,12 +1,20 @@
 import { DB, save } from '../state.js';
-import { activeDebts, debtById, fmtCRC, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
+import { activeDebts, addMonthsISO, debtById, fmtCRC, fmtDateLong, fmtMoney, lastBalance, parseNum, toCRC } from '../utils.js';
 import { closeModal, showModal } from '../modal.js';
 import { uid } from '../uid.js';
 import { renderAll } from '../render-all.js';
+import { singleDebtProjection } from './estrategia.js';
 
 /* =========================================================
-   PESTAÑA: DEUDAS
+   PESTAÑA: INGRESAR DEUDAS
    ========================================================= */
+function finEstimadoHTML(d, crc) {
+  const proj = singleDebtProjection(crc, d.rate, toCRC(d.minPayment || 0, d.currency));
+  if (!proj) return '<span class="chip warn">falta dato</span>';
+  if (!proj.reached) return '<span class="chip warn">cuota insuficiente</span>';
+  return fmtDateLong(addMonthsISO(proj.months));
+}
+
 export function renderDeudas() {
   const el = document.getElementById('tab-deudas');
   const missing = activeDebts().filter(d => d.rate === null || d.rate === undefined);
@@ -16,11 +24,11 @@ export function renderDeudas() {
   }
   html += `<div class="card">
     <div class="card-head">
-      <h2>Deudas</h2>
+      <h2>Ingresar deudas</h2>
       <button class="btn primary" id="btnNewDebt">Agregar deuda</button>
     </div>
     <table><thead><tr>
-      <th></th><th>Deuda</th><th class="hide-sm">Tipo</th><th class="ta-r">Tasa anual</th><th class="ta-r hide-sm">Cuota mínima</th><th class="ta-r">Saldo actual</th><th class="ta-r"></th>
+      <th></th><th>Deuda</th><th class="hide-sm">Tipo</th><th class="ta-r">Tasa anual</th><th class="ta-r hide-sm">Cuota mínima</th><th class="ta-r">Saldo actual</th><th class="hide-sm">Inicio</th><th class="ta-r hide-sm">Fin estimado</th><th class="ta-r"></th>
     </tr></thead><tbody>`;
 
   const rows = activeDebts().map(d => ({ d, crc: toCRC(lastBalance(d.id), d.currency) })).sort((a, b) => b.crc - a.crc);
@@ -33,6 +41,8 @@ export function renderDeudas() {
       <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
       <td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>
       <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
+      <td class="hide-sm num">${d.startDate ? fmtDateLong(d.startDate) : '<span class="dim">—</span>'}</td>
+      <td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>
       <td class="ta-r"><button class="btn ghost" data-editdebt="${d.id}">Editar</button></td>
     </tr>`;
   });
@@ -47,7 +57,7 @@ export function renderDeudas() {
 }
 
 export function openDebt(id) {
-  const d = id ? debtById(id) : { id: null, name: '', issuer: '', kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false };
+  const d = id ? debtById(id) : { id: null, name: '', issuer: '', kind: 'tarjeta', currency: 'CRC', rate: null, minPayment: null, notes: '', archived: false, startDate: null };
   showModal(`
     <h2>${id ? 'Editar deuda' : 'Nueva deuda'}</h2>
     <div class="grid g2">
@@ -62,6 +72,7 @@ export function openDebt(id) {
       </select></div>
       <div><label>Tasa de interés anual %</label><input class="num-in" id="dRate" value="${d.rate ?? ''}" placeholder="Ej: 48.5" inputmode="decimal"></div>
       <div><label>Cuota mínima mensual</label><input class="num-in" id="dMin" value="${d.minPayment ?? ''}" placeholder="Ej: 45000" inputmode="decimal"></div>
+      <div><label>Fecha de inicio</label><input type="date" id="dStart" value="${d.startDate || ''}"></div>
     </div>
     <div style="margin-top:12px"><label>Notas</label><textarea id="dNotes" rows="2" placeholder="Fecha de corte, número de cuenta, condiciones…">${d.notes || ''}</textarea></div>
     ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:13px;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>` : ''}
@@ -80,6 +91,7 @@ export function openDebt(id) {
       currency: document.getElementById('dCur').value,
       rate: parseNum(document.getElementById('dRate').value),
       minPayment: parseNum(document.getElementById('dMin').value),
+      startDate: document.getElementById('dStart').value || null,
       notes: document.getElementById('dNotes').value,
       archived: id ? document.getElementById('dArch').checked : false
     };

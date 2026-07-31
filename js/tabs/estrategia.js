@@ -2,7 +2,9 @@ import { DB, save } from '../state.js';
 import { activeDebts, fmtCRC, lastBalance, parseNum, toCRC } from '../utils.js';
 
 /* =========================================================
-   PESTAÑA: ESTRATEGIA (bola de nieve vs avalancha)
+   ESTRATEGIA (bola de nieve vs avalancha)
+   Ya no es una pestaña propia: sus cálculos y su fragmento de
+   HTML se insertan dentro de la pestaña "Inicio" (js/tabs/inicio.js).
    ========================================================= */
 export function orderedPlan(strategy) {
   const list = activeDebts()
@@ -36,8 +38,25 @@ export function simulate(strategy, extra) {
   return { months, interest, payoff, reached: months < 600 };
 }
 
-export function renderEstrategia() {
-  const el = document.getElementById('tab-estrategia');
+/** Proyección de UNA sola deuda, pagando solo su cuota mínima
+ *  (sin extra ni orden de ataque). Usada en "Ingresar deudas"
+ *  para mostrar una fecha de fin estimada por deuda. */
+export function singleDebtProjection(balCRC, ratePct, minCRC) {
+  if (ratePct === null || ratePct === undefined || !minCRC || balCRC <= 0) return null;
+  const rate = ratePct / 100 / 12;
+  let bal = balCRC, months = 0, interest = 0;
+  while (bal > 0.5 && months < 600) {
+    months++;
+    const i = bal * rate;
+    bal += i; interest += i;
+    const pay = Math.min(minCRC, bal);
+    bal -= pay;
+  }
+  return { months, interest, reached: months < 600 };
+}
+
+/** Fragmento de HTML de la tarjeta "¿Cuál ataco primero?" + proyección. */
+export function strategySectionHTML() {
   const st = DB.settings.strategy || 'avalancha';
   const extra = DB.settings.extra || 0;
   const plan = orderedPlan(st);
@@ -89,8 +108,11 @@ export function renderEstrategia() {
       <p class="muted" style="font-size:14px;margin:0">Para simular en cuánto tiempo salís y cuánto pagás en intereses, cada deuda activa necesita <strong>tasa anual</strong> y <strong>cuota mínima</strong>. ${noMin.length ? `Faltan cuotas en: ${noMin.map(m => m.d.name).join(', ')}.` : ''}</p>
       <div class="btn-row" style="margin-top:12px"><button class="btn" data-goto="deudas">Ir a completar los datos</button></div></div>`;
   }
-  el.innerHTML = html;
+  return html;
+}
 
+/** Conecta el input de pago extra después de insertar strategySectionHTML() en el DOM. */
+export function wireStrategySection(rerender) {
   const inp = document.getElementById('extraIn');
-  inp.onchange = () => { DB.settings.extra = parseNum(inp.value) || 0; save(); renderEstrategia(); };
+  if (inp) inp.onchange = () => { DB.settings.extra = parseNum(inp.value) || 0; save(); rerender(); };
 }

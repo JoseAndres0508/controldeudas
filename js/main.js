@@ -4,7 +4,7 @@ import { initModal } from './modal.js';
 import { initNav, showTab } from './nav.js';
 import { openCut } from './tabs/cortes.js';
 import { openDebt } from './tabs/deudas.js';
-import { renderEstrategia } from './tabs/estrategia.js';
+import { renderInicio } from './tabs/inicio.js';
 import { exportJSON, importJSON, openSettings } from './settings.js';
 import { getStatus, readFile, tryRestore } from './fileSync.js';
 
@@ -22,7 +22,7 @@ document.body.addEventListener('click', e => {
   if (t.hasAttribute('data-newcut')) openCut(t.dataset.newcut || null, null);
   else if (t.hasAttribute('data-editcut')) openCut(null, t.dataset.editcut);
   else if (t.hasAttribute('data-editdebt')) openDebt(t.dataset.editdebt);
-  else if (t.hasAttribute('data-strat')) { DB.settings.strategy = t.dataset.strat; save(); renderEstrategia(); }
+  else if (t.hasAttribute('data-strat')) { DB.settings.strategy = t.dataset.strat; save(); renderInicio(); }
   else if (t.hasAttribute('data-goto')) showTab(t.dataset.goto);
 });
 document.body.addEventListener('click', e => { if (e.target.id === 'btnNewDebt') openDebt(null); });

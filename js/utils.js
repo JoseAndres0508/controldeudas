@@ -11,6 +11,8 @@ export const fmtDate = iso => { const [y, m, d] = iso.split('-'); return `${d}/$
 export const fmtDateLong = iso => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`; };
 export const toCRC = (amount, cur) => cur === 'USD' ? amount * (DB.settings.fx || 512) : amount;
 export const parseNum = s => { if (s === '' || s === null || s === undefined) return null; const v = parseFloat(String(s).replace(/[^0-9.\-]/g, '')); return isNaN(v) ? null : v; };
+/** Fecha ISO de hoy + n meses (para proyectar fechas de pago). */
+export const addMonthsISO = n => { const d = new Date(); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); };
 
 export const sortedPeriods = () => [...DB.periods].sort((a, b) => a.date.localeCompare(b.date));
 export const activeDebts = () => DB.debts.filter(d => !d.archived);
@@ -45,6 +47,22 @@ export function series() {
     const prev = i > 0 ? periodTotalCRC(ps[i - 1]) : null;
     return { id: p.id, date: p.date, total, delta: prev === null ? null : prev - total };
   });
+}
+
+/** Para cada deuda activa con al menos 2 registros: cuánto bajó (₡) entre
+ *  su primer y su último saldo conocido. Base de la sección "La que más bajó". */
+export function debtReductions() {
+  return activeDebts().map(d => {
+    const ps = sortedPeriods().filter(p => {
+      const e = p.entries[d.id];
+      return e && e.balance !== null && e.balance !== undefined;
+    });
+    if (ps.length < 2) return null;
+    const first = ps[0], last = ps[ps.length - 1];
+    const firstCRC = toCRC(first.entries[d.id].balance, d.currency);
+    const lastCRC = toCRC(last.entries[d.id].balance, d.currency);
+    return { d, reduction: firstCRC - lastCRC, firstDate: first.date, lastDate: last.date };
+  }).filter(Boolean);
 }
 
 /** Fecha del próximo corte esperado (15 o fin de mes) que aún no existe. */
