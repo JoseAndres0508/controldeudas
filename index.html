@@ -34,6 +34,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2"/></svg>
       <span>Acreedores</span>
     </button>
+    <button role="tab" data-tab="reportes" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      <span>Reportes</span>
+    </button>
   </nav>
   <div class="side-foot">
     <button class="side-link" id="btnSettings">
@@ -57,6 +61,7 @@
   <section id="tab-deudas" hidden></section>
   <section id="tab-cortes" hidden></section>
   <section id="tab-acreedores" hidden></section>
+  <section id="tab-reportes" hidden></section>
 </main>
 
 </div>
@@ -64,6 +69,9 @@
 <div class="scrim" id="scrim"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import { DB, save } from './state.js';
-import { debtById, fmtDateLong, fmtMoney, parseNum } from './utils.js';
+import { debtById, fmtDateLong, fmtMoney, parseNum, toCRC } from './utils.js';
 import { uid } from './uid.js';
 import { closeModal, showModal } from './modal.js';
 
@@ -9,6 +9,14 @@ import { closeModal, showModal } from './modal.js';
    Cada pago reduce el saldo "actual" de su deuda (ver
    lastBalance en utils.js) hasta que un corte nuevo lo confirme.
    ========================================================= */
+/** Suma histórica de todos los pagos registrados, en colones. */
+export function totalPaidCRC() {
+  return DB.payments.reduce((s, p) => {
+    const d = debtById(p.debtId);
+    return d ? s + toCRC(p.amount, d.currency) : s;
+  }, 0);
+}
+
 export const paymentsForDebt = debtId =>
   DB.payments.filter(p => p.debtId === debtId).sort((a, b) => b.date.localeCompare(a.date));
 

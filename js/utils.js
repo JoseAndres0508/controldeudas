@@ -74,6 +74,20 @@ export function debtReductions() {
   }).filter(Boolean);
 }
 
+/** Deuda total agrupada por acreedor (solo deudas activas con saldo). */
+export function debtsByCreditor() {
+  const groups = new Map();
+  activeDebts().forEach(d => {
+    const crc = toCRC(lastBalance(d.id), d.currency);
+    if (crc <= 0) return;
+    const key = d.creditorId || '__sin__';
+    if (!groups.has(key)) groups.set(key, { creditor: creditorById(d.creditorId), total: 0, count: 0 });
+    const g = groups.get(key);
+    g.total += crc; g.count += 1;
+  });
+  return [...groups.values()].sort((a, b) => b.total - a.total);
+}
+
 /** Fecha del próximo corte esperado (15 o fin de mes) que aún no existe. */
 export function pendingCutDate() {
   const today = new Date();
