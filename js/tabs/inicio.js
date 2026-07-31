@@ -1,7 +1,7 @@
 import { DB } from '../state.js';
 import { activeDebts, debtById, debtReductions, fmtBase, fmtCRC, fmtDateLong, lastBalance, overallProgress, toCRC } from '../utils.js';
 import { heroHTML, tapeHTML } from '../header.js';
-import { simulate, strategySectionHTML, wireStrategySection } from './estrategia.js';
+import { simulate } from './estrategia.js';
 import { chartsSectionHTML, drawCharts } from './historial.js';
 import { dueInfo, movementAmountHTML, movementLabel, recentPayments, statusDotHTML, STATUS_LABEL } from '../payments.js';
 
@@ -35,6 +35,7 @@ export function renderInicio() {
     <button class="btn primary" data-newdebt>+ Agregar deuda</button>
     <button class="btn" data-quickpago>Registrar pago</button>
     <button class="btn" data-quickconsumo>Registrar consumo</button>
+    <button class="btn" data-goto="estrategia">Ver estrategia</button>
   </div>`;
 
   const overall = overallProgress();
@@ -110,10 +111,8 @@ export function renderInicio() {
   html += `<div class="grid g2">${bestCard}${recentCard}</div>`;
 
   html += tapeHTML();
-  html += strategySectionHTML();
   html += chartsSectionHTML();
 
   el.innerHTML = html;
-  wireStrategySection(renderInicio);
   drawCharts();
 }

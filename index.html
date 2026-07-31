@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <!-- El ?v= obliga al navegador a bajar la hoja de estilos nueva en vez de
      usar la que tiene guardada. Subí el número cada vez que cambie el CSS. -->
-<link rel="stylesheet" href="css/styles.css?v=6">
+<link rel="stylesheet" href="css/styles.css?v=7">
 <script>
   /* Aplica tema y tamaño de letra antes de pintar, para que no haya
      un parpadeo claro→oscuro al cargar la página. */
@@ -75,6 +75,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
       <span>Cortes</span>
     </button>
+    <button role="tab" id="tabbtn-estrategia" data-tab="estrategia" aria-selected="false" aria-controls="tab-estrategia" tabindex="-1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+      <span>Estrategia</span>
+    </button>
     <button role="tab" id="tabbtn-acreedores" data-tab="acreedores" aria-selected="false" aria-controls="tab-acreedores" tabindex="-1">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6.2 7-6.2s7 2.6 7 6.2"/></svg>
       <span>Acreedores</span>
@@ -106,6 +110,7 @@
   <section id="tab-inicio" role="tabpanel" aria-labelledby="tabbtn-inicio" tabindex="0"></section>
   <section id="tab-deudas" role="tabpanel" aria-labelledby="tabbtn-deudas" tabindex="0" hidden></section>
   <section id="tab-cortes" role="tabpanel" aria-labelledby="tabbtn-cortes" tabindex="0" hidden></section>
+  <section id="tab-estrategia" role="tabpanel" aria-labelledby="tabbtn-estrategia" tabindex="0" hidden></section>
   <section id="tab-acreedores" role="tabpanel" aria-labelledby="tabbtn-acreedores" tabindex="0" hidden></section>
   <section id="tab-reportes" role="tabpanel" aria-labelledby="tabbtn-reportes" tabindex="0" hidden></section>
 </main>
@@ -133,6 +138,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script type="module" src="js/main.js?v=6"></script>
+<script type="module" src="js/main.js?v=7"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 import { renderInicio } from './tabs/inicio.js';
 import { renderCortes } from './tabs/cortes.js';
 import { renderDeudas } from './tabs/deudas.js';
+import { renderEstrategia } from './tabs/estrategia.js';
 import { renderAcreedores } from './tabs/acreedores.js';
 import { renderReportes } from './tabs/reportes.js';
 
@@ -8,6 +9,7 @@ import { renderReportes } from './tabs/reportes.js';
 export function renderAll() {
   renderCortes();
   renderDeudas();
+  renderEstrategia();
   renderAcreedores();
   renderReportes();
   if (!document.getElementById('tab-inicio').hidden) renderInicio();

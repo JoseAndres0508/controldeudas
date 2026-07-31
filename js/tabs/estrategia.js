@@ -2,9 +2,11 @@ import { DB, save } from '../state.js';
 import { activeDebts, fmtCRC, lastBalance, parseNum, toCRC } from '../utils.js';
 
 /* =========================================================
-   ESTRATEGIA (bola de nieve vs avalancha)
-   Ya no es una pestaña propia: sus cálculos y su fragmento de
-   HTML se insertan dentro de la pestaña "Inicio" (js/tabs/inicio.js).
+   PESTAÑA: ESTRATEGIA
+   "¿Cuál ataco primero?" y la proyección de salida viven acá,
+   con su propia entrada en el menú. Antes estaban metidas
+   dentro de Inicio, donde se perdían entre el resto de las
+   tarjetas siendo de lo más importante del sistema.
    ========================================================= */
 export function orderedPlan(strategy) {
   const list = activeDebts()
@@ -115,4 +117,12 @@ export function strategySectionHTML() {
 export function wireStrategySection(rerender) {
   const inp = document.getElementById('extraIn');
   if (inp) inp.onchange = () => { DB.settings.extra = parseNum(inp.value) || 0; save(); rerender(); };
+}
+
+/** Pinta la pestaña completa. */
+export function renderEstrategia() {
+  const el = document.getElementById('tab-estrategia');
+  if (!el) return;
+  el.innerHTML = strategySectionHTML();
+  wireStrategySection(renderEstrategia);
 }

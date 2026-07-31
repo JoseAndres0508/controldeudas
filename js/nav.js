@@ -7,8 +7,8 @@ import { renderInicio } from './tabs/inicio.js';
    mueven entre ellas. Los selectores apuntan a .side-nav
    explícitamente porque ahora también hay un <nav> en el pie.
    ========================================================= */
-const TITLES = { inicio: 'Inicio', deudas: 'Ingresar deudas', cortes: 'Cortes', acreedores: 'Acreedores', reportes: 'Reportes' };
-const TABS = ['inicio', 'deudas', 'cortes', 'acreedores', 'reportes'];
+const TITLES = { inicio: 'Inicio', deudas: 'Ingresar deudas', cortes: 'Cortes', estrategia: 'Estrategia', acreedores: 'Acreedores', reportes: 'Reportes' };
+const TABS = ['inicio', 'deudas', 'cortes', 'estrategia', 'acreedores', 'reportes'];
 
 export function showTab(name) {
   if (!TABS.includes(name)) return;
