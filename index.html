@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libro de deudas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <small>Libro de deudas</small>
+    <div class="hero">
+      <div class="fig" id="heroFig">—</div>
+      <div class="sub"><span id="heroSub">Cargando…</span> <span id="heroDelta"></span></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn" id="btnExport">Exportar respaldo</button>
+    <button class="btn" id="btnImport">Importar</button>
+    <input type="file" id="fileImport" accept="application/json" hidden>
+    <button class="btn" id="btnSettings">Ajustes</button>
+  </div>
+</header>
+
+<div class="tape">
+  <div class="tape-head">
+    <div>
+      <div class="eyebrow">Cinta de cortes</div>
+      <div class="muted" style="font-size:13px">Cada barra es un corte. Altura = cuánto se movió la deuda total.</div>
+    </div>
+    <div class="num dim" style="font-size:12px" id="tapeCount"></div>
+  </div>
+  <div class="tape-track" id="tapeTrack"></div>
+  <div class="tape-labels" id="tapeLabels"></div>
+  <div class="tape-legend">
+    <span><i style="background:var(--down)"></i>La deuda bajó (avanzaste)</span>
+    <span><i style="background:var(--up)"></i>La deuda subió</span>
+    <span><i style="background:var(--rule)"></i>Sin movimiento</span>
+  </div>
+</div>
+
+<nav role="tablist">
+  <button role="tab" data-tab="cortes" aria-selected="true">Cortes</button>
+  <button role="tab" data-tab="deudas" aria-selected="false">Deudas</button>
+  <button role="tab" data-tab="estrategia" aria-selected="false">Estrategia</button>
+  <button role="tab" data-tab="historial" aria-selected="false">Historial</button>
+</nav>
+
+<section id="tab-cortes"></section>
+<section id="tab-deudas" hidden></section>
+<section id="tab-estrategia" hidden></section>
+<section id="tab-historial" hidden></section>
+
+</div>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
