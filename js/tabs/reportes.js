@@ -52,10 +52,10 @@ export function renderReportes() {
     html += `<div class="card">
       <div class="card-head">
         <h2>Avance general</h2>
-        <span class="num" style="font-size:13px">${overall.pct !== null ? overall.pct.toFixed(1) + '%' : ''}</span>
+        <span class="num" style="font-size:.8125rem">${overall.pct !== null ? overall.pct.toFixed(1) + '%' : ''}</span>
       </div>
       <div class="mini-track" style="height:8px"><div class="mini-fill f-down" style="width:${overall.pct ?? 0}%"></div></div>
-      <p class="dim" style="font-size:13px;margin:8px 0 0">Arrancaste con <strong>${fmtBase(overall.initial)}</strong> y hoy debés <strong>${fmtBase(overall.current)}</strong>: llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados sobre ${overall.count} deuda${overall.count === 1 ? '' : 's'}.</p>
+      <p class="dim" style="font-size:.8125rem;margin:8px 0 0">Arrancaste con <strong>${fmtBase(overall.initial)}</strong> y hoy debés <strong>${fmtBase(overall.current)}</strong>: llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados sobre ${overall.count} deuda${overall.count === 1 ? '' : 's'}.</p>
     </div>`;
   }
 
@@ -67,13 +67,13 @@ export function renderReportes() {
     <div class="card-head"><h2>Avance por deuda</h2></div>
     ${progRows.length ? `<table><thead><tr><th>Deuda</th><th class="ta-r hide-sm">Saldo inicial</th><th class="ta-r">Saldo actual</th><th class="ta-r hide-sm">Pagado</th><th>Avance</th></tr></thead><tbody>
       ${progRows.map(({ d, p }) => `<tr>
-        <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
+        <td><strong style="font-weight:500">${d.name}</strong><br><span class="dim" style="font-size:.75rem">${creditorName(d)}</span></td>
         <td class="ta-r num hide-sm">${p ? fmtMoney(p.initial, d.currency) : '<span class="chip warn">falta</span>'}</td>
         <td class="ta-r num">${fmtMoney(lastBalance(d.id), d.currency)}</td>
         <td class="ta-r num hide-sm">${p ? (p.grew ? `<span style="color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>` : `<span style="color:var(--down)">${fmtMoney(p.paid, d.currency)}</span>`) : '<span class="dim">—</span>'}</td>
         <td>${!p ? '<span class="dim">Cargá el saldo inicial</span>'
           : p.grew ? '<span class="chip vencido">creció</span>'
-          : `<div style="min-width:100px"><div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div><span class="num dim" style="font-size:11px">${p.pct !== null ? p.pct.toFixed(1) + '%' : '—'}</span></div>`}</td>
+          : `<div style="min-width:100px"><div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div><span class="num dim" style="font-size:.6875rem">${p.pct !== null ? p.pct.toFixed(1) + '%' : '—'}</span></div>`}</td>
       </tr>`).join('')}
     </tbody></table>` : `<div class="empty">Todavía no hay deudas activas.</div>`}
   </div>`;
@@ -113,7 +113,7 @@ export function renderReportes() {
   html += `<div class="card">
     <div class="card-head">
       <h2>Todos los movimientos</h2>
-      <span class="dim" style="font-size:13px">${movs.length} movimiento${movs.length === 1 ? '' : 's'} · neto ${movNetCRC > 0 ? '+' : movNetCRC < 0 ? '−' : ''}${fmtBase(Math.abs(movNetCRC))}</span>
+      <span class="dim" style="font-size:.8125rem">${movs.length} movimiento${movs.length === 1 ? '' : 's'} · neto ${movNetCRC > 0 ? '+' : movNetCRC < 0 ? '−' : ''}${fmtBase(Math.abs(movNetCRC))}</span>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
       <div style="flex:1;min-width:180px"><label>Buscar</label><input id="movSearch" placeholder="Deuda, acreedor o nota…" value="${movSearch}"></div>
@@ -125,10 +125,10 @@ export function renderReportes() {
       ${movs.map(p => {
         const d = debtById(p.debtId);
         return `<tr>
-          <td class="num" style="font-size:13px">${fmtDateLong(p.date)}</td>
-          <td>${d ? d.name : '<span class="dim">(deuda borrada)</span>'}${d ? `<br><span class="dim" style="font-size:12px">${creditorName(d)}</span>` : ''}</td>
+          <td class="num" style="font-size:.8125rem">${fmtDateLong(p.date)}</td>
+          <td>${d ? d.name : '<span class="dim">(deuda borrada)</span>'}${d ? `<br><span class="dim" style="font-size:.75rem">${creditorName(d)}</span>` : ''}</td>
           <td class="hide-sm"><span class="chip">${movementLabel(p)}</span></td>
-          <td class="hide-sm">${p.note ? `<span style="font-size:13px">${p.note}</span>` : '<span class="dim">—</span>'}${p.receipt ? ` <a href="${p.receipt.dataUrl}" download="${p.receipt.name}" title="Descargar comprobante">📎</a>` : ''}</td>
+          <td class="hide-sm">${p.note ? `<span style="font-size:.8125rem">${p.note}</span>` : '<span class="dim">—</span>'}${p.receipt ? ` <a href="${p.receipt.dataUrl}" download="${p.receipt.name}" title="Descargar comprobante">📎</a>` : ''}</td>
           <td class="ta-r">${d ? movementAmountHTML(p, d.currency) : ''}</td>
           <td class="ta-r">${d ? `<button class="btn ghost" data-verdebt="${d.id}">Ver</button>` : ''}</td>
         </tr>`;
@@ -138,7 +138,7 @@ export function renderReportes() {
 
   html += `<div class="card">
     <div class="card-head"><h2>Exportar</h2></div>
-    <p class="dim" style="font-size:13px;margin:0 0 12px">Generá un archivo con el estado actual para guardar o compartir.</p>
+    <p class="dim" style="font-size:.8125rem;margin:0 0 12px">Generá un archivo con el estado actual para guardar o compartir.</p>
     <div class="btn-row">
       <button class="btn" id="btnExportExcel">Exportar Excel</button>
       <button class="btn" id="btnExportPDF">Exportar PDF</button>

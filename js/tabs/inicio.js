@@ -41,14 +41,14 @@ export function renderInicio() {
   html += `<div class="stat-row">
     <div class="stat"><div class="k">Libre en</div><div class="v">${sim && sim.reached ? sim.months + ' meses' : '—'}</div></div>
     <div class="stat"><div class="k">Avance total</div><div class="v">${overall && overall.pct !== null ? overall.pct.toFixed(1) + '%' : '—'}</div></div>
-    <div class="stat"><div class="k">La que más bajó</div><div class="v" style="font-size:15px">${best ? best.d.name : '—'}</div></div>
+    <div class="stat"><div class="k">La que más bajó</div><div class="v" style="font-size:.9375rem">${best ? best.d.name : '—'}</div></div>
   </div>`;
 
   if (overall && overall.pct !== null) {
     html += `<div class="card">
-      <div class="card-head"><h2>Avance desde el inicio</h2><span class="num" style="font-size:13px">${overall.pct.toFixed(1)}%</span></div>
+      <div class="card-head"><h2>Avance desde el inicio</h2><span class="num" style="font-size:.8125rem">${overall.pct.toFixed(1)}%</span></div>
       <div class="mini-track" style="height:8px"><div class="mini-fill f-down" style="width:${overall.pct}%"></div></div>
-      <p class="dim" style="font-size:13px;margin:8px 0 0">De <strong>${fmtBase(overall.initial)}</strong> iniciales llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados. Quedan ${fmtBase(overall.current)}.</p>
+      <p class="dim" style="font-size:.8125rem;margin:8px 0 0">De <strong>${fmtBase(overall.initial)}</strong> iniciales llevás <strong style="color:var(--down)">${fmtBase(overall.paid)}</strong> pagados. Quedan ${fmtBase(overall.current)}.</p>
     </div>`;
   }
 
@@ -61,7 +61,7 @@ export function renderInicio() {
       <div class="card-head"><h2>Pagos próximos y vencidos</h2></div>
       ${dues.map(({ d, info }) => `<div class="mini-row">
           ${statusDotHTML(info)}
-          <div class="mini-main"><p class="mini-name">${d.name}</p><span class="dim" style="font-size:12px">${STATUS_LABEL[info.status]} · ${fmtDateLong(info.date)}</span></div>
+          <div class="mini-main"><p class="mini-name">${d.name}</p><span class="dim" style="font-size:.75rem">${STATUS_LABEL[info.status]} · ${fmtDateLong(info.date)}</span></div>
           <button class="btn ghost" data-pagar="${d.id}">Pagar</button>
         </div>`).join('')}
     </div>` : null;
@@ -86,7 +86,7 @@ export function renderInicio() {
 
   const bestCard = `<div class="card">
     <div class="card-head"><h2>La que más bajó</h2></div>
-    ${best ? `<p style="margin:0 0 10px;font-size:14px"><strong style="font-weight:500">${best.d.name}</strong> bajó <strong style="color:var(--down)">${fmtCRC(best.reduction)}</strong> desde el ${fmtDateLong(best.firstDate)}.</p>
+    ${best ? `<p style="margin:0 0 10px;font-size:.875rem"><strong style="font-weight:500">${best.d.name}</strong> bajó <strong style="color:var(--down)">${fmtCRC(best.reduction)}</strong> desde el ${fmtDateLong(best.firstDate)}.</p>
       ${reductions.length > 1 ? reductions.slice(0, 5).map(x => `<div class="mini-row">
           <div class="mini-main"><p class="mini-name">${x.d.name}</p>
             <div class="mini-track"><div class="mini-fill f-down" style="width:${Math.round((x.reduction / reductions[0].reduction) * 100)}%"></div></div>
@@ -101,7 +101,7 @@ export function renderInicio() {
     ${recent.length ? recent.map(p => {
       const d = debtById(p.debtId);
       return `<div class="mini-row">
-        <div class="mini-main"><p class="mini-name">${d ? d.name : '(deuda borrada)'}</p><span class="dim" style="font-size:12px">${fmtDateLong(p.date)} · ${movementLabel(p)}${p.note ? ' · ' + p.note : ''}</span></div>
+        <div class="mini-main"><p class="mini-name">${d ? d.name : '(deuda borrada)'}</p><span class="dim" style="font-size:.75rem">${fmtDateLong(p.date)} · ${movementLabel(p)}${p.note ? ' · ' + p.note : ''}</span></div>
         <span class="mini-val">${d ? movementAmountHTML(p, d.currency) : ''}</span>
       </div>`;
     }).join('') : `<div class="empty">Todavía no hay pagos registrados.</div>`}

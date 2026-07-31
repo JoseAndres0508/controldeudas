@@ -43,9 +43,9 @@ export function tapeHTML() {
     <div class="tape-head">
       <div>
         <div class="eyebrow">Cinta de cortes</div>
-        <div class="muted" style="font-size:13px">Cada barra es un corte. Altura = cuánto se movió la deuda total.</div>
+        <div class="muted" style="font-size:.8125rem">Cada barra es un corte. Altura = cuánto se movió la deuda total.</div>
       </div>
-      <div class="num dim" style="font-size:12px">${all.length} cortes</div>
+      <div class="num dim" style="font-size:.75rem">${all.length} cortes</div>
     </div>
     <div class="tape-track">${track}</div>
     <div class="tape-labels">${labels}</div>

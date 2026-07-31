@@ -10,7 +10,7 @@ export function confirmDialog(message, { confirmLabel = 'Eliminar', danger = tru
   return new Promise(resolve => {
     showModal(`
       <h2>Confirmar</h2>
-      <p style="font-size:14px;margin:0">${message}</p>
+      <p style="font-size:.875rem;margin:0">${message}</p>
       <div class="modal-foot">
         <button class="btn" id="cfNo">Cancelar</button>
         <button class="btn ${danger ? 'danger' : 'primary'}" id="cfYes">${confirmLabel}</button>

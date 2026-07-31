@@ -29,7 +29,7 @@ export function renderCortes() {
 
   html += `<div class="card">
     <div class="card-head">
-      <div><h2>Cortes registrados</h2><div class="dim" style="font-size:13px">Los días 15 y 30 anotás cuánto abonaste y con qué saldo quedó cada deuda.</div></div>
+      <div><h2>Cortes registrados</h2><div class="dim" style="font-size:.8125rem">Los días 15 y 30 anotás cuánto abonaste y con qué saldo quedó cada deuda.</div></div>
       <div class="btn-row">
         <button class="btn" data-newcut="">Nuevo corte</button>
       </div>

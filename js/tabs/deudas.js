@@ -34,17 +34,17 @@ function finEstimadoHTML(d, crc) {
 function dueHTML(d) {
   const info = dueInfo(d);
   if (!info) return '<span class="dim">—</span>';
-  return `${statusDotHTML(info)} <span class="num" style="font-size:12px">${fmtDateLong(info.date)}</span>`;
+  return `${statusDotHTML(info)} <span class="num" style="font-size:.75rem">${fmtDateLong(info.date)}</span>`;
 }
 
 /** Mini barra de avance contra el saldo inicial, para la tabla. */
 function progressCellHTML(d) {
   const p = debtProgress(d);
   if (!p) return '<span class="chip warn">falta inicial</span>';
-  if (p.grew) return `<span class="num" style="font-size:12px;color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>`;
+  if (p.grew) return `<span class="num" style="font-size:.75rem;color:var(--up)">+${fmtMoney(p.grown, d.currency)}</span>`;
   return `<div style="min-width:88px">
     <div class="mini-track"><div class="mini-fill f-down" style="width:${p.pct ?? 0}%"></div></div>
-    <span class="num dim" style="font-size:11px">${p.pct !== null ? p.pct.toFixed(0) + '%' : '—'}</span>
+    <span class="num dim" style="font-size:.6875rem">${p.pct !== null ? p.pct.toFixed(0) + '%' : '—'}</span>
   </div>`;
 }
 
@@ -85,11 +85,11 @@ export function renderDeudas() {
       const st = debtStatus(d, crc);
       html += `<tr${st === 'pagada' ? ' style="opacity:.6"' : ''}>
         <td><span class="chip">${d.currency}</span></td>
-        <td><strong style="font-weight:500">${d.name}</strong>${st === 'pagada' ? ' <span class="chip">pagada</span>' : ''}<br><span class="dim" style="font-size:12px">${creditorName(d)}</span></td>
+        <td><strong style="font-weight:500">${d.name}</strong>${st === 'pagada' ? ' <span class="chip">pagada</span>' : ''}<br><span class="dim" style="font-size:.75rem">${creditorName(d)}</span></td>
         ${showDetails ? `<td class="hide-sm"><span class="chip">${d.kind}</span></td>` : ''}
         <td class="ta-r num">${d.rate === null || d.rate === undefined ? '<span class="chip warn">falta</span>' : d.rate.toFixed(2) + '%'}</td>
         ${showDetails ? `<td class="ta-r num hide-sm">${d.initialBalance != null ? fmtMoney(d.initialBalance, d.currency) : '<span class="chip warn">falta</span>'}</td><td class="ta-r num hide-sm">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '<span class="dim">—</span>'}</td>` : ''}
-        <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:11px">${fmtCRC(crc)}</span>` : ''}</td>
+        <td class="ta-r num">${fmtMoney(bal, d.currency)}${d.currency === 'USD' ? `<br><span class="dim" style="font-size:.6875rem">${fmtCRC(crc)}</span>` : ''}</td>
         <td class="hide-sm">${progressCellHTML(d)}</td>
         <td class="hide-sm">${dueHTML(d)}</td>
         ${showDetails ? `<td class="ta-r num hide-sm">${finEstimadoHTML(d, crc)}</td>` : ''}
@@ -167,9 +167,9 @@ export function openDebt(id, preselectCreditorId) {
       <div><label>Día de pago (1-31)</label><input class="num-in" id="dDue" value="${d.dueDay ?? ''}" placeholder="Ej: 15" inputmode="numeric"></div>
       <div><label>Saldo inicial ${d.currency === 'USD' ? '($)' : '(₡)'}</label><input class="num-in" id="dInitial" value="${d.initialBalance ?? ''}" placeholder="Ej: 1600000" inputmode="decimal"></div>
     </div>
-    <p class="dim" style="font-size:12px;margin:8px 0 0">El saldo inicial es con cuánto arrancó la deuda. Sirve para medir cuánto llevás pagado. En una tarjeta que te dieron en cero, poné 0.</p>
+    <p class="dim" style="font-size:.75rem;margin:8px 0 0">El saldo inicial es con cuánto arrancó la deuda. Sirve para medir cuánto llevás pagado. En una tarjeta que te dieron en cero, poné 0.</p>
     <div style="margin-top:12px"><label>Notas</label><textarea id="dNotes" rows="2" placeholder="Fecha de corte, número de cuenta, condiciones…">${d.notes || ''}</textarea></div>
-    ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:13px;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>
+    ${id ? `<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:.8125rem;color:var(--ink-2)"><input type="checkbox" id="dArch" ${d.archived ? 'checked' : ''} style="width:auto"> Archivar (ya está saldada, no aparece en cortes ni estrategia)</label></div>
     <hr style="margin:16px 0 10px">
     <h3 style="margin-bottom:4px">Historial de movimientos</h3>
     ${paymentsHistoryHTML(id)}` : ''}
@@ -220,18 +220,18 @@ export function openDebt(id, preselectCreditorId) {
 function progressCardHTML(d, prog) {
   if (!prog) {
     return `<div class="card"><div class="card-head"><h3>Avance</h3></div>
-      <p class="dim" style="font-size:13px;margin:0">Cargá el <strong>saldo inicial</strong> en Editar para poder medir cuánto llevás pagado de esta deuda.</p></div>`;
+      <p class="dim" style="font-size:.8125rem;margin:0">Cargá el <strong>saldo inicial</strong> en Editar para poder medir cuánto llevás pagado de esta deuda.</p></div>`;
   }
   if (prog.grew) {
     return `<div class="card"><div class="card-head"><h3>Avance</h3></div>
-      <p style="margin:0;font-size:14px">Hoy debés <strong style="color:var(--up)">${fmtMoney(prog.grown, d.currency)}</strong> más que al inicio (${fmtMoney(prog.initial, d.currency)}).</p></div>`;
+      <p style="margin:0;font-size:.875rem">Hoy debés <strong style="color:var(--up)">${fmtMoney(prog.grown, d.currency)}</strong> más que al inicio (${fmtMoney(prog.initial, d.currency)}).</p></div>`;
   }
   return `<div class="card"><div class="card-head">
       <h3>Avance</h3>
-      <span class="num" style="font-size:13px">${prog.pct !== null ? prog.pct.toFixed(1) + '%' : ''}</span>
+      <span class="num" style="font-size:.8125rem">${prog.pct !== null ? prog.pct.toFixed(1) + '%' : ''}</span>
     </div>
     <div class="mini-track" style="height:8px"><div class="mini-fill f-down" style="width:${prog.pct ?? 0}%"></div></div>
-    <p class="dim" style="font-size:13px;margin:8px 0 0">Llevás <strong style="color:var(--down)">${fmtMoney(prog.paid, d.currency)}</strong> pagados de ${fmtMoney(prog.initial, d.currency)}${prog.done ? ' — deuda saldada.' : '.'}</p>
+    <p class="dim" style="font-size:.8125rem;margin:8px 0 0">Llevás <strong style="color:var(--down)">${fmtMoney(prog.paid, d.currency)}</strong> pagados de ${fmtMoney(prog.initial, d.currency)}${prog.done ? ' — deuda saldada.' : '.'}</p>
   </div>`;
 }
 
@@ -249,21 +249,21 @@ export function openDebtDetail(id) {
 
   showModal(`
     <h2>${d.name}${info ? `<span style="margin-left:8px">${statusDotHTML(info)}</span>` : ''}</h2>
-    <p class="dim" style="font-size:13px;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind}</p>
+    <p class="dim" style="font-size:.8125rem;margin:0 0 14px">${creditorName(d) || 'Sin acreedor'} · ${d.kind}</p>
     <div class="stat-row">
       <div class="stat"><div class="k">Saldo inicial</div><div class="v">${prog ? fmtMoney(prog.initial, d.currency) : '—'}</div></div>
       <div class="stat"><div class="k">Saldo actual</div><div class="v">${fmtMoney(bal, d.currency)}</div></div>
       <div class="stat"><div class="k">Tasa anual</div><div class="v">${d.rate != null ? d.rate.toFixed(2) + '%' : '—'}</div></div>
-      <div class="stat"><div class="k">Cuota mínima</div><div class="v" style="font-size:15px">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '—'}</div></div>
-      <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:15px">${proj && proj.reached ? fmtDateLong(addMonthsISO(proj.months)) : '—'}</div></div>
+      <div class="stat"><div class="k">Cuota mínima</div><div class="v" style="font-size:.9375rem">${d.minPayment ? fmtMoney(d.minPayment, d.currency) : '—'}</div></div>
+      <div class="stat"><div class="k">Fin estimado</div><div class="v" style="font-size:.9375rem">${proj && proj.reached ? fmtDateLong(addMonthsISO(proj.months)) : '—'}</div></div>
     </div>
     ${progressCardHTML(d, prog)}
     ${c ? `<div class="card">
       <div class="card-head"><h3>Acreedor</h3></div>
-      <p style="margin:0;font-size:14px"><strong style="font-weight:500">${c.name}</strong></p>
-      ${c.phone ? `<p class="dim" style="font-size:13px;margin:4px 0 0">${c.phone}</p>` : ''}
-      ${c.email ? `<p class="dim" style="font-size:13px;margin:2px 0 0">${c.email}</p>` : ''}
-      ${!c.phone && !c.email ? `<p class="dim" style="font-size:13px;margin:4px 0 0">Sin datos de contacto — completalos en Acreedores.</p>` : ''}
+      <p style="margin:0;font-size:.875rem"><strong style="font-weight:500">${c.name}</strong></p>
+      ${c.phone ? `<p class="dim" style="font-size:.8125rem;margin:4px 0 0">${c.phone}</p>` : ''}
+      ${c.email ? `<p class="dim" style="font-size:.8125rem;margin:2px 0 0">${c.email}</p>` : ''}
+      ${!c.phone && !c.email ? `<p class="dim" style="font-size:.8125rem;margin:4px 0 0">Sin datos de contacto — completalos en Acreedores.</p>` : ''}
     </div>` : ''}
     <h3 style="margin-bottom:4px">Historial de movimientos</h3>
     ${paymentsHistoryHTML(id)}

@@ -10,15 +10,22 @@ import { openPago, openQuickPago } from './payments.js';
 import { exportJSON, importJSON, openSettings } from './settings.js';
 import { getStatus, readFile, tryRestore } from './fileSync.js';
 import { initGlobalSearch } from './globalSearch.js';
+import { initAppearance, onThemeChange } from './appearance.js';
+import { drawCharts } from './tabs/historial.js';
 
 /* =========================================================
    PUNTO DE ARRANQUE
    Conecta los módulos entre sí, cablea los eventos globales
    y dispara el primer render.
    ========================================================= */
+initAppearance();
 initModal();
 initNav();
 initGlobalSearch();
+
+/* Los gráficos llevan colores calculados en JS: al cambiar de tema o de
+   tamaño de letra hay que volver a dibujarlos con la paleta nueva. */
+onThemeChange(() => { if (!document.getElementById('tab-inicio').hidden) drawCharts(); });
 
 document.body.addEventListener('click', e => {
   const t = e.target.closest('[data-newcut],[data-editcut],[data-editdebt],[data-strat],[data-goto],[data-editcreditor],[data-pagar],[data-consumo],[data-ajuste],[data-verdebt],[data-newdebt],[data-quickpago],[data-quickconsumo]');

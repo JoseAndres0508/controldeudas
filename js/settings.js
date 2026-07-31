@@ -14,17 +14,17 @@ import { toast } from './toast.js';
 function fileSection() {
   const st = getStatus();
   if (!supported) {
-    return `<p class="muted" style="font-size:13px;margin:0 0 12px">Tu navegador no permite guardar directamente en un archivo de tu compu (funciona en Chrome/Edge). Los datos quedan en este navegador; usá <strong>Exportar respaldo</strong> seguido para no perderlos.</p>`;
+    return `<p class="muted" style="font-size:.8125rem;margin:0 0 12px">Tu navegador no permite guardar directamente en un archivo de tu compu (funciona en Chrome/Edge). Los datos quedan en este navegador; usá <strong>Exportar respaldo</strong> seguido para no perderlos.</p>`;
   }
   if (st === 'connected') {
-    return `<p class="muted" style="font-size:13px;margin:0 0 10px">Conectado a <strong>${getFileName()}</strong>. Cada cambio se guarda ahí, además del navegador.</p>
+    return `<p class="muted" style="font-size:.8125rem;margin:0 0 10px">Conectado a <strong>${getFileName()}</strong>. Cada cambio se guarda ahí, además del navegador.</p>
       <div class="btn-row"><button class="btn" id="fDisconnect">Desconectar archivo</button></div>`;
   }
   if (st === 'needs-permission') {
-    return `<p class="muted" style="font-size:13px;margin:0 0 10px">Hay un archivo conectado (<strong>${getFileName()}</strong>) pero el navegador necesita que confirmes el acceso de nuevo esta sesión.</p>
+    return `<p class="muted" style="font-size:.8125rem;margin:0 0 10px">Hay un archivo conectado (<strong>${getFileName()}</strong>) pero el navegador necesita que confirmes el acceso de nuevo esta sesión.</p>
       <div class="btn-row"><button class="btn primary" id="fReconnect">Reconectar archivo</button></div>`;
   }
-  return `<p class="muted" style="font-size:13px;margin:0 0 10px">Conectá un archivo .json (por ejemplo, dentro de esta misma carpeta del proyecto) para que cada cambio se guarde ahí automáticamente, además del navegador. Al abrir el sistema, se lee ese archivo para traer la última versión.</p>
+  return `<p class="muted" style="font-size:.8125rem;margin:0 0 10px">Conectá un archivo .json (por ejemplo, dentro de esta misma carpeta del proyecto) para que cada cambio se guarde ahí automáticamente, además del navegador. Al abrir el sistema, se lee ese archivo para traer la última versión.</p>
     <div class="btn-row"><button class="btn primary" id="fConnect">Conectar archivo</button></div>`;
 }
 
@@ -40,13 +40,13 @@ export function openSettings() {
         </select>
       </div>
     </div>
-    <p class="muted" style="font-size:13px;margin:12px 0 0">El tipo de cambio se usa para convertir las deudas en dólares y sumarlas junto a las de colones. La moneda base define en cuál se muestran los totales generales (Inicio y Reportes).</p>
+    <p class="muted" style="font-size:.8125rem;margin:12px 0 0">El tipo de cambio se usa para convertir las deudas en dólares y sumarlas junto a las de colones. La moneda base define en cuál se muestran los totales generales (Inicio y Reportes).</p>
     <hr style="margin:18px 0">
     <h3 style="margin-bottom:6px">Archivo de datos</h3>
     ${fileSection()}
     <hr style="margin:18px 0">
     <h3 style="margin-bottom:6px">Datos</h3>
-    <p class="muted" style="font-size:13px;margin:0 0 12px">${Store.persistent ? 'Se guardan en este navegador. Exportá de vez en cuando: si limpiás datos del sitio, se borran.' : 'Este navegador bloqueó el almacenamiento local. Exportá antes de cerrar.'}</p>
+    <p class="muted" style="font-size:.8125rem;margin:0 0 12px">${Store.persistent ? 'Se guardan en este navegador. Exportá de vez en cuando: si limpiás datos del sitio, se borran.' : 'Este navegador bloqueó el almacenamiento local. Exportá antes de cerrar.'}</p>
     <div class="btn-row">
       <button class="btn danger" id="sReset">Borrar todo y volver a la semilla</button>
     </div>

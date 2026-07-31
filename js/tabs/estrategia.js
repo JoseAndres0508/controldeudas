@@ -65,13 +65,13 @@ export function strategySectionHTML() {
 
   let html = `<div class="card">
     <div class="card-head">
-      <div><h2>¿Cuál ataco primero?</h2><div class="dim" style="font-size:13px">Pagás la cuota mínima de todas y cualquier plata extra va completa a la primera de la lista.</div></div>
+      <div><h2>¿Cuál ataco primero?</h2><div class="dim" style="font-size:.8125rem">Pagás la cuota mínima de todas y cualquier plata extra va completa a la primera de la lista.</div></div>
       <div class="seg">
         <button data-strat="avalancha" aria-pressed="${st === 'avalancha'}">Avalancha</button>
         <button data-strat="bola" aria-pressed="${st === 'bola'}">Bola de nieve</button>
       </div>
     </div>
-    <p class="muted" style="font-size:13px;margin:0 0 14px">${st === 'avalancha'
+    <p class="muted" style="font-size:.8125rem;margin:0 0 14px">${st === 'avalancha'
       ? 'Avalancha: primero la tasa más alta. Es la que menos intereses te cuesta en total.'
       : 'Bola de nieve: primero el saldo más pequeño. Cuesta un poco más en intereses, pero cerrás deudas rápido y eso sostiene la motivación.'}</p>`;
 
@@ -102,10 +102,10 @@ export function strategySectionHTML() {
         <div class="stat"><div class="k">Bola de nieve · libre en</div><div class="v">${simB.months} meses</div></div>
         <div class="stat"><div class="k">Bola de nieve · intereses</div><div class="v">${fmtCRC(simB.interest)}</div></div>
       </div>
-      <p class="muted" style="font-size:13px;margin:0">La avalancha te ahorra <strong>${fmtCRC(Math.abs(diff))}</strong> en intereses y ${Math.abs(mdiff)} mes${Math.abs(mdiff) === 1 ? '' : 'es'} respecto a la bola de nieve. Elegí bola de nieve solo si necesitás ver deudas cerradas para no rendirte.</p></div>`;
+      <p class="muted" style="font-size:.8125rem;margin:0">La avalancha te ahorra <strong>${fmtCRC(Math.abs(diff))}</strong> en intereses y ${Math.abs(mdiff)} mes${Math.abs(mdiff) === 1 ? '' : 'es'} respecto a la bola de nieve. Elegí bola de nieve solo si necesitás ver deudas cerradas para no rendirte.</p></div>`;
   } else {
     html += `<div class="card"><h3 style="margin-bottom:8px">Proyección</h3>
-      <p class="muted" style="font-size:14px;margin:0">Para simular en cuánto tiempo salís y cuánto pagás en intereses, cada deuda activa necesita <strong>tasa anual</strong> y <strong>cuota mínima</strong>. ${noMin.length ? `Faltan cuotas en: ${noMin.map(m => m.d.name).join(', ')}.` : ''}</p>
+      <p class="muted" style="font-size:.875rem;margin:0">Para simular en cuánto tiempo salís y cuánto pagás en intereses, cada deuda activa necesita <strong>tasa anual</strong> y <strong>cuota mínima</strong>. ${noMin.length ? `Faltan cuotas en: ${noMin.map(m => m.d.name).join(', ')}.` : ''}</p>
       <div class="btn-row" style="margin-top:12px"><button class="btn" data-goto="deudas">Ir a completar los datos</button></div></div>`;
   }
   return html;

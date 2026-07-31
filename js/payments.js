@@ -56,7 +56,7 @@ export function movementAmountHTML(p, currency) {
   const t = moveType(p);
   const { sign, color } = MOVE_TYPES[t];
   const prefix = sign > 0 ? '+' : sign < 0 ? '−' : '=';
-  return `<span class="num" style="font-size:13px;color:${color}">${prefix} ${fmtMoney(p.amount, currency)}</span>`;
+  return `<span class="num" style="font-size:.8125rem;color:${color}">${prefix} ${fmtMoney(p.amount, currency)}</span>`;
 }
 
 export function movementLabel(p) { return MOVE_TYPES[moveType(p)].label; }
@@ -145,14 +145,14 @@ function fileToReceipt(file) {
 export function paymentsHistoryHTML(debtId) {
   const list = paymentsForDebt(debtId);
   const d = debtById(debtId);
-  if (!list.length) return `<p class="dim" style="font-size:13px;margin:8px 0 0">Todavía no hay movimientos registrados para esta deuda.</p>`;
+  if (!list.length) return `<p class="dim" style="font-size:.8125rem;margin:8px 0 0">Todavía no hay movimientos registrados para esta deuda.</p>`;
   return `<div style="margin-top:8px">
     ${list.map(p => `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--rule-soft)">
       <div>
-        <span class="num" style="font-size:13px">${fmtDateLong(p.date)}</span>
+        <span class="num" style="font-size:.8125rem">${fmtDateLong(p.date)}</span>
         <span class="chip" style="margin-left:6px">${movementLabel(p)}</span>
-        ${p.note ? `<span class="dim" style="font-size:12px"> · ${p.note}</span>` : ''}
-        ${p.receipt ? `<a href="${p.receipt.dataUrl}" download="${p.receipt.name}" style="font-size:12px;margin-left:6px" title="Descargar comprobante">📎</a>` : ''}
+        ${p.note ? `<span class="dim" style="font-size:.75rem"> · ${p.note}</span>` : ''}
+        ${p.receipt ? `<a href="${p.receipt.dataUrl}" download="${p.receipt.name}" style="font-size:.75rem;margin-left:6px" title="Descargar comprobante">📎</a>` : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         ${movementAmountHTML(p, d.currency)}
@@ -190,14 +190,14 @@ export function openPago(debtId, onDone, type = 'pago') {
 
   showModal(`
     <h2>Movimiento — ${d.name}</h2>
-    <p class="dim" style="font-size:13px;margin:-8px 0 14px">Saldo actual: <span class="num">${fmtMoney(saldo, d.currency)}</span></p>
+    <p class="dim" style="font-size:.8125rem;margin:-8px 0 14px">Saldo actual: <span class="num">${fmtMoney(saldo, d.currency)}</span></p>
     <div><label>Tipo de movimiento</label>
       <div class="seg" id="pType" style="display:flex">
         ${Object.entries(MOVE_TYPES).map(([k, v]) =>
           `<button type="button" data-ptype="${k}" aria-pressed="${k === type}" style="flex:1">${v.label}</button>`).join('')}
       </div>
     </div>
-    <p class="dim" id="pHint" style="font-size:12px;margin:8px 0 0">${HINTS[type]}</p>
+    <p class="dim" id="pHint" style="font-size:.75rem;margin:8px 0 0">${HINTS[type]}</p>
     <div class="grid g2" style="margin-top:12px">
       <div><label>Fecha</label><input type="date" id="pDate" value="${new Date().toISOString().slice(0, 10)}"></div>
       <div><label id="pAmountLabel">${type === 'ajuste' ? `Saldo real hoy ${cur}` : `Monto ${cur}`}</label><input class="num-in" id="pAmount" value="${type === 'ajuste' ? saldo : ''}" placeholder="0" inputmode="decimal"></div>

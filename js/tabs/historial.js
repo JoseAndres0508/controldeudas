@@ -1,4 +1,5 @@
 import { activeDebts, debtProgress, fmtCRC, fmtDate, overallProgress, series, toCRC } from '../utils.js';
+import { cssVar } from '../appearance.js';
 
 /* =========================================================
    GRÁFICOS (Chart.js, cargado global vía <script> UMD en index.html)
@@ -11,13 +12,13 @@ export function chartsSectionHTML() {
   const hasProgress = !!overallProgress();
   return `
     <div class="card"><h3 style="margin-bottom:4px">Deuda total en colones</h3>
-      <p class="dim" style="font-size:13px;margin:0 0 12px">La línea punteada es el total con el que arrancaste.</p>
+      <p class="dim" style="font-size:.8125rem;margin:0 0 12px">La línea punteada es el total con el que arrancaste.</p>
       <div class="chart-box"><canvas id="c1" role="img" aria-label="Línea de la deuda total en colones por fecha de corte">Deuda total por corte.</canvas></div></div>
     <div class="card"><h3 style="margin-bottom:4px">Movimiento por corte</h3>
-      <p class="dim" style="font-size:13px;margin:0 0 12px">Barra hacia arriba = la deuda bajó. Hacia abajo = creció.</p>
+      <p class="dim" style="font-size:.8125rem;margin:0 0 12px">Barra hacia arriba = la deuda bajó. Hacia abajo = creció.</p>
       <div class="chart-box"><canvas id="c2" role="img" aria-label="Barras del cambio de deuda por corte">Cambio de deuda por corte.</canvas></div></div>
     ${hasProgress ? `<div class="card"><h3 style="margin-bottom:4px">Saldo inicial vs. actual por deuda</h3>
-      <p class="dim" style="font-size:13px;margin:0 0 12px">Cuánto queda de cada deuda respecto a con cuánto empezó.</p>
+      <p class="dim" style="font-size:.8125rem;margin:0 0 12px">Cuánto queda de cada deuda respecto a con cuánto empezó.</p>
       <div class="chart-box"><canvas id="c3" role="img" aria-label="Barras comparando saldo inicial y actual de cada deuda">Saldo inicial contra saldo actual por deuda.</canvas></div></div>` : ''}`;
 }
 
@@ -26,13 +27,26 @@ export function drawCharts() {
   const s = series();
   if (!window.Chart || !s.length) return;
   const labels = s.map(x => fmtDate(x.date));
-  const axis = { grid: { color: '#DEE2DB' }, ticks: { color: '#8A918A', font: { size: 10, family: 'IBM Plex Mono' } } };
+
+  // Los colores salen de las variables CSS del tema activo, así que los
+  // gráficos siguen el modo claro/oscuro sin duplicar la paleta acá.
+  const ink = cssVar('--ink') || '#101418';
+  const ink3 = cssVar('--ink-3') || '#8A918A';
+  const ruleSoft = cssVar('--rule-soft') || '#DEE2DB';
+  const rule = cssVar('--rule') || '#C9CEC6';
+  const down = cssVar('--down') || '#0F6E56';
+  const up = cssVar('--up') || '#A32D2D';
+  // El tamaño de las etiquetas del canvas acompaña la escala de letra.
+  const fsScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fs')) || 1;
+  const tickSize = Math.round(10 * fsScale);
+
+  const axis = { grid: { color: ruleSoft }, ticks: { color: ink3, font: { size: tickSize, family: 'IBM Plex Mono' } } };
   chart1?.destroy(); chart2?.destroy(); chart3?.destroy();
 
   const overall = overallProgress();
-  const datasets1 = [{ label: 'Deuda total', data: s.map(x => x.total), borderColor: '#101418', backgroundColor: 'rgba(16,20,24,.06)', fill: true, tension: .15, borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: '#101418' }];
+  const datasets1 = [{ label: 'Deuda total', data: s.map(x => x.total), borderColor: ink, backgroundColor: 'rgba(128,128,128,.10)', fill: true, tension: .15, borderWidth: 2, pointRadius: 2.5, pointBackgroundColor: ink }];
   if (overall) {
-    datasets1.push({ label: 'Saldo inicial', data: labels.map(() => overall.initial), borderColor: '#8A918A', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false });
+    datasets1.push({ label: 'Saldo inicial', data: labels.map(() => overall.initial), borderColor: ink3, borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false });
   }
   chart1 = new Chart(document.getElementById('c1'), {
     type: 'line',
@@ -43,7 +57,7 @@ export function drawCharts() {
   });
   chart2 = new Chart(document.getElementById('c2'), {
     type: 'bar',
-    data: { labels, datasets: [{ data: s.map(x => x.delta), backgroundColor: s.map(x => x.delta === null ? 'transparent' : x.delta >= 0 ? '#0F6E56' : '#A32D2D'), borderRadius: 3 }] },
+    data: { labels, datasets: [{ data: s.map(x => x.delta), backgroundColor: s.map(x => x.delta === null ? 'transparent' : x.delta >= 0 ? down : up), borderRadius: 3 }] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw === null ? 'sin dato' : (c.raw > 0 ? 'Bajó ' : 'Subió ') + fmtCRC(Math.abs(c.raw)) } } },
       scales: { x: { ...axis, grid: { display: false }, ticks: { ...axis.ticks, maxRotation: 45, autoSkip: false } }, y: { ...axis, ticks: { ...axis.ticks, callback: v => (v < 0 ? '-' : '') + '₡' + Math.abs(v / 1e6).toFixed(1) + 'M' } } } }
@@ -63,12 +77,12 @@ export function drawCharts() {
     data: {
       labels: rows.map(r => r.name),
       datasets: [
-        { label: 'Saldo inicial', data: rows.map(r => r.initial), backgroundColor: '#C9CEC6', borderRadius: 3 },
-        { label: 'Saldo actual', data: rows.map(r => r.current), backgroundColor: '#101418', borderRadius: 3 }
+        { label: 'Saldo inicial', data: rows.map(r => r.initial), backgroundColor: rule, borderRadius: 3 },
+        { label: 'Saldo actual', data: rows.map(r => r.current), backgroundColor: ink, borderRadius: 3 }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-      plugins: { legend: { display: true, labels: { color: '#4E5650', font: { size: 11, family: 'Archivo' }, boxWidth: 12 } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtCRC(c.raw)}` } } },
-      scales: { x: { ...axis, ticks: { ...axis.ticks, callback: v => '₡' + (v / 1e6).toFixed(0) + 'M' } }, y: { ...axis, grid: { display: false }, ticks: { ...axis.ticks, font: { size: 10, family: 'Archivo' } } } } }
+      plugins: { legend: { display: true, labels: { color: cssVar('--ink-2') || '#4E5650', font: { size: Math.round(11 * fsScale), family: 'Archivo' }, boxWidth: 12 } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtCRC(c.raw)}` } } },
+      scales: { x: { ...axis, ticks: { ...axis.ticks, callback: v => '₡' + (v / 1e6).toFixed(0) + 'M' } }, y: { ...axis, grid: { display: false }, ticks: { ...axis.ticks, font: { size: tickSize, family: 'Archivo' } } } } }
   });
 }

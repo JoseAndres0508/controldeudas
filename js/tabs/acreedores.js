@@ -36,7 +36,7 @@ export function renderAcreedores() {
       html += `<tr>
         <td><strong style="font-weight:500">${c.name}</strong></td>
         <td class="hide-sm">${contacto.length
-          ? contacto.map(v => `<span style="font-size:13px">${v}</span>`).join('<br>')
+          ? contacto.map(v => `<span style="font-size:.8125rem">${v}</span>`).join('<br>')
           : '<span class="dim">Sin datos de contacto</span>'}</td>
         <td class="ta-r num">${count}</td>
         <td class="ta-r"><button class="btn ghost" data-editcreditor="${c.id}">Editar</button></td>
